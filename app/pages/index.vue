@@ -51,7 +51,15 @@ function selectSymbol(symbol: string) {
   router.push(`/explore/${symbol}`)
 }
 
-const popular = ['NVDA', 'MSFT', 'AMZN', 'GOOGL', 'META', 'TSLA', 'AAPL', 'BTC-USD', 'ETH-USD', 'SPY', 'QQQ']
+const popular = ['NVDA', 'MSFT', 'AMZN', 'GOOGL', 'META', 'TSLA', 'AAPL', 'AVGO', 'BTC-USD', 'ETH-USD', 'SPY', 'QQQ']
+
+const nameFor = (symbol: string) => {
+  for (const g of groupedSymbols.value) {
+    const item = g.items.find((s) => s.symbol === symbol)
+    if (item) return item.name
+  }
+  return symbol
+}
 </script>
 
 <template>
@@ -120,16 +128,23 @@ const popular = ['NVDA', 'MSFT', 'AMZN', 'GOOGL', 'META', 'TSLA', 'AAPL', 'BTC-U
         </p>
       </div>
 
-      <div class="mt-8">
-        <p class="text-xs uppercase tracking-wide text-muted-foreground mb-3">Popular</p>
-        <div class="flex flex-wrap gap-2">
+      <div class="mt-10">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-medium">Popular</h2>
+          <span class="text-xs text-muted-foreground">Tap to explore</span>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
           <button
             v-for="sym in popular"
             :key="sym"
-            class="inline-flex items-center gap-1.5 border rounded-full px-4 py-1.5 text-sm hover:bg-muted transition-colors cursor-pointer"
+            class="group flex flex-col justify-between rounded-2xl border border-border/40 bg-background/40 backdrop-blur-xl p-4 text-left hover:border-foreground/30 hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer"
             @click="router.push(`/explore/${sym}`)"
           >
-            {{ sym }}
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-base">{{ sym }}</span>
+              <ArrowRight class="size-4 text-muted-foreground/40 group-hover:text-foreground transition-colors" />
+            </div>
+            <span class="mt-1 text-xs text-muted-foreground truncate">{{ nameFor(sym) }}</span>
           </button>
         </div>
       </div>
