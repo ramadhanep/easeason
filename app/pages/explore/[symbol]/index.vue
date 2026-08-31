@@ -31,6 +31,12 @@ const fmt = (n: number | undefined): string => {
 }
 
 const totalProfiles = computed(() => data.value?.profiles?.length ?? 0)
+
+const bg = computed(() => BRAND_COLORS[symbol.value])
+const fg = computed(() => {
+  const color = bg.value
+  return color ? brandTextColor(color) : undefined
+})
 </script>
 
 <template>
@@ -95,14 +101,16 @@ const totalProfiles = computed(() => data.value?.profiles?.length ?? 0)
           <div class="mb-3 flex items-center justify-between gap-3 flex-wrap px-1">
             <div class="inline-flex items-center gap-1 rounded-full bg-muted p-1">
               <button
-                :class="yKey === 'pct' ? 'bg-background shadow-sm' : 'text-muted-foreground'"
+                :class="yKey === 'pct' ? 'shadow-sm' : 'text-muted-foreground'"
+                :style="yKey === 'pct' ? { backgroundColor: bg ?? 'var(--background)', color: fg } : {}"
                 class="rounded-full px-4 py-1.5 text-sm font-medium transition-colors cursor-pointer"
                 @click="yKey = 'pct'"
               >
                 Percentage
               </button>
               <button
-                :class="yKey === 'factor' ? 'bg-background shadow-sm' : 'text-muted-foreground'"
+                :class="yKey === 'factor' ? 'shadow-sm' : 'text-muted-foreground'"
+                :style="yKey === 'factor' ? { backgroundColor: bg ?? 'var(--background)', color: fg } : {}"
                 class="rounded-full px-4 py-1.5 text-sm font-medium transition-colors cursor-pointer"
                 @click="yKey = 'factor'"
               >

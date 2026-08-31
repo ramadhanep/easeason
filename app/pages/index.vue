@@ -137,14 +137,15 @@ const nameFor = (symbol: string) => {
           <button
             v-for="sym in popular"
             :key="sym"
-            class="group flex flex-col justify-between rounded-2xl border border-border/40 bg-background/40 backdrop-blur-xl p-4 text-left hover:border-foreground/30 hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer"
+            class="group flex flex-col justify-between rounded-2xl p-4 text-left hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer"
+            :style="{ backgroundColor: BRAND_COLORS[sym], color: brandTextColor(BRAND_COLORS[sym]) }"
             @click="router.push(`/explore/${sym}`)"
           >
             <div class="flex items-center justify-between">
               <span class="font-bold text-base">{{ sym }}</span>
-              <ArrowRight class="size-4 text-muted-foreground/40 group-hover:text-foreground transition-colors" />
+              <ArrowRight class="size-4 opacity-50 group-hover:opacity-100 transition-opacity" />
             </div>
-            <span class="mt-1 text-xs text-muted-foreground truncate">{{ nameFor(sym) }}</span>
+            <span class="mt-1 text-xs opacity-70 truncate">{{ nameFor(sym) }}</span>
           </button>
         </div>
       </div>
