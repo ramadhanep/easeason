@@ -116,9 +116,39 @@
   .prose-ease ul {
     @apply list-disc pl-6 mb-4 space-y-1;
   }
-  .prose-ease ol {
-    @apply list-decimal pl-6 mb-4 space-y-1;
-  }
+.prose-ease ol {
+  @apply list-decimal pl-6 mb-4 space-y-1;
+}
+.prose-ease table {
+  @apply text-sm border-collapse my-4 w-full;
+  display: block;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.prose-ease thead {
+  display: table-header-group;
+  @apply bg-muted;
+}
+.prose-ease tbody {
+  display: table-row-group;
+}
+.prose-ease tr {
+  display: table-row;
+}
+.prose-ease th {
+  @apply font-semibold px-3 py-2 border-b border-border text-left whitespace-nowrap;
+  display: table-cell;
+}
+.prose-ease td {
+  @apply px-3 py-2 border-b border-border/60 text-left whitespace-nowrap;
+  display: table-cell;
+}
+.prose-ease tbody tr {
+  @apply transition-colors;
+}
+.prose-ease tbody tr:hover {
+  @apply bg-muted/50;
+}
   .prose-ease code {
     @apply rounded bg-muted px-1.5 py-0.5 text-sm font-mono;
   }

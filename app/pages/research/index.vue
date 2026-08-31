@@ -13,9 +13,10 @@ onMounted(() => { mounted.value = true })
 
 const { data: articles } = await useAsyncData('research-index', () =>
   queryCollection('research')
-    .select('title', 'description', 'path')
+    .select('title', 'description', 'meta', 'path')
     .order('path', 'ASC')
-    .all(),
+    .all()
+    .then((docs: any[]) => docs.map((d) => ({ ...d, image: d.meta?.image }))),
 )
 </script>
 

@@ -19,7 +19,10 @@ onMounted(() => {
 const { data: groups } = await useFetch('/api/symbols')
 
 const { data: articles } = await useAsyncData('home-research', () =>
-  queryCollection('research').select('title', 'description', 'path').order('path', 'ASC').all(),
+  queryCollection('research')
+    .select('title', 'description', 'meta', 'path')
+    .all()
+    .then((docs: any[]) => docs.map((d) => ({ ...d, image: d.meta?.image }))),
 )
 
 const searchOpen = ref(false)
@@ -53,14 +56,6 @@ const popular = ['NVDA', 'MSFT', 'AMZN', 'GOOGL', 'META', 'TSLA', 'AAPL', 'BTC-U
 
 <template>
   <div class="min-h-screen relative bg-background text-foreground">
-    <div class="hidden md:block fixed top-1/2 -right-12 -translate-y-1/2 z-50">
-      <span
-        class="block rotate-90 origin-center text-muted-foreground/40 font-semibold tracking-widest text-sm select-none"
-      >
-        easeason
-      </span>
-    </div>
-
     <div class="mx-auto max-w-2xl px-4 py-8">
       <div class="rounded-[2rem] border border-white/10 dark:border-white/10 bg-white/40 dark:bg-white/[0.06] backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] mb-8 overflow-hidden p-2">
         <div class="flex items-center gap-2">

@@ -120,7 +120,7 @@ const totalProfiles = computed(() => data.value?.profiles?.length ?? 0)
           </div>
 
           <ClientOnly>
-            <SeasonalChart ref="chartRef" :profiles="data.profiles" :current-year="data.currentYear" :y-key="yKey" :is-dark="isDark" />
+            <SeasonalChart ref="chartRef" :profiles="data.profiles" :current-year="data.currentYear" :y-key="yKey" :is-dark="isDark" :symbol="symbol" />
             <template #fallback>
               <Skeleton class="h-[480px] w-full" />
             </template>

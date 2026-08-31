@@ -37,8 +37,9 @@ const props = withDefaults(
     currentYear?: CurrentYear
     yKey?: 'pct' | 'factor'
     isDark?: boolean
+    symbol?: string
   }>(),
-  { yKey: 'pct', isDark: false },
+  { yKey: 'pct', isDark: false, symbol: '' },
 )
 
 const chartRef = ref<VChart | null>(null)
@@ -50,7 +51,7 @@ function exportPng() {
   const url = (chart as any).getDataURL?.({ pixelRatio: 2, backgroundColor: bg })
   if (!url) return
   const link = document.createElement('a')
-  link.download = 'easeason-seasonality.png'
+  link.download = `easeason-seasonality-${props.symbol.toLowerCase()}.png`
   link.href = url
   link.click()
 }
