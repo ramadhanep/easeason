@@ -1,5 +1,4 @@
-import { readFileSync } from 'node:fs'
-import path from 'node:path'
+import { getStockName } from '../../utils/stocks'
 import { defineEventHandler, createError, getRouterParam, setHeader } from 'h3'
 import { fetchHistoricalData, computeSeasonal } from '../../utils/seasonal'
 import type { SeasonalResponse } from '../../utils/seasonal'
@@ -15,10 +14,7 @@ async function getData(symbol: string): Promise<SeasonalData> {
   const hit = CACHE.get(symbol)
   if (hit && Date.now() - hit.t < 30 * 60 * 1000) return hit.response as unknown as SeasonalData
 
-  const csv = readFileSync(path.resolve(process.cwd(), 'server/data/stocks.csv'), 'utf8')
-  const nameRow = csv.split('\n').map((l) => l.trim()).filter(Boolean)
-    .find((l) => l.startsWith(`${symbol},`))
-  const name = nameRow ? nameRow.split(',')[1] : symbol
+  const name = getStockName(symbol) || symbol
 
   const rows = await fetchHistoricalData(symbol)
   if (!rows.length) throw createError({ statusCode: 404, statusMessage: `No data for ${symbol}` })

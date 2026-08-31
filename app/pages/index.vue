@@ -122,9 +122,9 @@ const nameFor = (symbol: string) => {
       </div>
 
       <div class="text-center">
-        <h2 class="text-3xl font-semibold tracking-tight">Explore historical market seasonality</h2>
+        <h2 class="text-3xl font-semibold tracking-tight">eseason</h2>
         <p class="text-sm text-muted-foreground mt-2">
-          See how stocks, crypto, and indices historically move throughout the year.
+          Research/visualization tool for exploring how assets have historically moved throughout the year, including U.S. presidential election-cycle patterns.
         </p>
       </div>
 
