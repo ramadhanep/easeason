@@ -57,7 +57,7 @@ function selectSymbol(symbol: string) {
   router.push(`/explore/${symbol}`)
 }
 
-const popular = ['NVDA', 'MSFT', 'AMZN', 'GOOGL', 'META', 'TSLA', 'AAPL', 'AVGO', 'BTC-USD', 'ETH-USD', 'SPY', 'QQQ']
+const popular = ['SPY', 'QQQ', 'NVDA', 'MSFT', 'AMZN', 'GOOGL', 'META', 'TSLA', 'AAPL', 'AVGO', 'BTC-USD', 'ETH-USD']
 
 const nameFor = (symbol: string) => {
   for (const g of groupedSymbols.value) {
