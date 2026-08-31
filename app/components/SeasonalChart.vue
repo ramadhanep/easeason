@@ -132,8 +132,17 @@ const option = computed(() => {
         return html
       },
     },
+    grid: {
+      left: 56,
+      right: 20,
+      top: 30,
+      bottom: 90,
+    },
     legend: {
       bottom: 0,
+      height: '140px',
+      width: 'calc(100% - 40px)',
+      scrollData: true,
       textStyle: { color: textColor, fontSize: 11 },
     },
     xAxis: {
@@ -153,6 +162,7 @@ const option = computed(() => {
         formatter: (v: number) => (props.yKey === 'pct' ? v + '%' : v + 'x'),
       },
       splitLine: { lineStyle: { color: gridColor } },
+      axisLine: { show: true, lineStyle: { color: gridColor, width: 1 } },
     },
     series: allSeries,
   }
@@ -160,7 +170,7 @@ const option = computed(() => {
 </script>
 
 <template>
-  <div class="h-[480px] w-full">
+  <div class="h-[540px] w-full">
     <VChart ref="chartRef" :option="option" autoresize class="h-full w-full" />
   </div>
 </template>

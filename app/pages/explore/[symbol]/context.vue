@@ -67,7 +67,7 @@ async function copyText() {
       <div v-if="pending" class="space-y-3">
         <Skeleton class="h-6 w-48" />
         <Skeleton class="h-4 w-96" />
-        <Skeleton class="h-[480px] w-full" />
+        <Skeleton class="h-[540px] w-full" />
       </div>
 
       <div v-else-if="error" class="py-24 text-center text-sm text-muted-foreground">

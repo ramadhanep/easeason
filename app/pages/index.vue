@@ -1,10 +1,16 @@
 <script setup lang="ts">
 import { Moon, Sun, Search, FileText, ArrowRight } from '@lucide/vue'
+import { useWindowScroll, useWindowSize } from '@vueuse/core'
 
 const router = useRouter()
 const colorMode = useColorMode()
 const isDark = computed(() => colorMode.value === 'dark')
 const mounted = ref(false)
+const { y: scrollY } = useWindowScroll()
+const { width: winWidth } = useWindowSize()
+const isMobile = computed(() => winWidth.value < 768)
+// Mobile-only floating header once the page is scrolled
+const floating = computed(() => isMobile.value && scrollY.value > 0)
 onMounted(() => {
   mounted.value = true
   const onKey = (e: KeyboardEvent) => {
@@ -65,7 +71,10 @@ const nameFor = (symbol: string) => {
 <template>
   <div class="min-h-screen relative bg-background text-foreground">
     <div class="mx-auto max-w-2xl px-4 py-8">
-      <div class="rounded-[2rem] border border-white/10 dark:border-white/10 bg-white/40 dark:bg-white/[0.06] backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] mb-8 overflow-hidden p-2">
+      <div
+        class="rounded-[2rem] border border-white/10 dark:border-white/10 bg-white/40 dark:bg-white/[0.06] backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] overflow-hidden p-2 transition-all duration-300"
+        :class="floating ? 'fixed inset-x-4 top-0 z-40' : 'mb-8'"
+      >
         <div class="flex items-center gap-2">
           <div class="flex-1 min-w-0">
             <Popover v-model:open="searchOpen">

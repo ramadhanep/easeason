@@ -7,6 +7,7 @@ const THEMES: Record<string, { bg: string; text: string }> = {
   NVDA: { bg: '#14210a', text: '#76b900' },
   AAPL: { bg: '#1d1d1f', text: '#ffffff' },
   'BTC-USD': { bg: '#161616', text: '#f7931a' },
+  AMZN: { bg: '#2a1a00', text: '#FF9900' },
 }
 
 const theme = computed(() => THEMES[props.symbol] ?? { bg: '#14210a', text: '#76b900' })

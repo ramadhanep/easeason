@@ -63,7 +63,7 @@ const fg = computed(() => {
       <div v-if="pending" class="space-y-4">
         <Skeleton class="h-8 w-48" />
         <Skeleton class="h-4 w-32" />
-        <Skeleton class="h-[480px] w-full" />
+        <Skeleton class="h-[540px] w-full" />
       </div>
 
       <div v-else-if="error" class="py-24 text-center">
@@ -130,7 +130,7 @@ const fg = computed(() => {
           <ClientOnly>
             <SeasonalChart ref="chartRef" :profiles="data.profiles" :current-year="data.currentYear" :y-key="yKey" :is-dark="isDark" :symbol="symbol" />
             <template #fallback>
-              <Skeleton class="h-[480px] w-full" />
+              <Skeleton class="h-[540px] w-full" />
             </template>
           </ClientOnly>
         </div>
