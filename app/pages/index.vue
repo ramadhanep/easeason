@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Moon, Sun, Search, Landmark, Bitcoin, Globe2, Database, TrendingUp, FileText, ArrowRight } from '@lucide/vue'
+import { Moon, Sun, Search, Landmark, Bitcoin, Globe2, Database, FileText, ArrowRight } from '@lucide/vue'
 
 const router = useRouter()
 const colorMode = useColorMode()
@@ -17,6 +17,10 @@ onMounted(() => {
 })
 
 const { data: groups } = await useFetch('/api/symbols')
+
+const { data: articles } = await useAsyncData('home-research', () =>
+  queryCollection('research').select('title', 'description', 'path').order('path', 'ASC').all(),
+)
 
 const searchOpen = ref(false)
 const searchQuery = ref('')
@@ -63,11 +67,6 @@ const popular = ['NVDA', 'BTC-USD', 'SPY', 'QQQ', 'ETH-USD']
           </Button>
         </div>
 
-        <div class="flex items-center justify-center mb-4">
-          <span class="inline-flex items-center justify-center size-10 rounded-xl border bg-card">
-            <TrendingUp class="size-5" />
-          </span>
-        </div>
         <h1 class="text-4xl font-semibold tracking-tight mb-3">easeason</h1>
         <p class="text-lg text-muted-foreground">Explore historical market seasonality.</p>
         <p class="text-sm text-muted-foreground mt-1">
@@ -147,6 +146,32 @@ const popular = ['NVDA', 'BTC-USD', 'SPY', 'QQQ', 'ETH-USD']
           <span class="text-xs text-muted-foreground">Indices</span>
         </div>
       </div>
+
+      <section class="mt-14">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-medium">Latest research</h2>
+          <NuxtLink to="/research" class="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
+            View all <ArrowRight class="size-4" />
+          </NuxtLink>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-2">
+          <NuxtLink
+            v-for="a in articles"
+            :key="a.path"
+            :to="a.path"
+            class="group border rounded-xl overflow-hidden hover:bg-muted/40 transition-colors"
+          >
+            <div class="aspect-[16/8] bg-muted/40 border-b flex items-center justify-center">
+              <img v-if="a.image" :src="a.image" :alt="a.title" class="w-full h-full object-cover" />
+              <FileText v-else class="size-6 text-muted-foreground/40 group-hover:text-muted-foreground/60 transition-colors" />
+            </div>
+            <div class="p-4">
+              <h3 class="font-medium leading-snug group-hover:text-foreground/80">{{ a.title }}</h3>
+              <p v-if="a.description" class="mt-1 line-clamp-2 text-sm text-muted-foreground">{{ a.description }}</p>
+            </div>
+          </NuxtLink>
+        </div>
+      </section>
 
       <footer class="mt-14 text-center text-xs text-muted-foreground flex items-center justify-center gap-1">
         <NuxtLink to="/research" class="inline-flex items-center gap-1 hover:text-foreground">

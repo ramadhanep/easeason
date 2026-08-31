@@ -121,11 +121,11 @@ function exportMarkdown() {
             </Select>
           </div>
           <div class="flex items-center gap-2">
-            <Button variant="outline" size="sm" class="gap-1.5" @click="chartRef?.exportPng()">
-              <Download class="size-4" /> PNG
+            <Button @click="exportMarkdown()" class="gap-1.5">
+              <FileDown class="size-4" /> Download .md for AI context
             </Button>
-            <Button variant="outline" size="sm" class="gap-1.5" @click="exportMarkdown()">
-              <FileDown class="size-4" /> .md
+            <Button variant="ghost" size="sm" class="gap-1.5" @click="chartRef?.exportPng()">
+              <Download class="size-4" /> PNG
             </Button>
           </div>
         </div>

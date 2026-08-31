@@ -105,7 +105,7 @@ export function buildSeasonalMarkdown(data: SeasonalData): string {
   const sep = ['|:---', ':---', ...allSeries.map(() => '---')].join(' | ')
   lines.push(header)
   lines.push(sep + ' |')
-  for (let day = 1; day <= maxDays; day += 7) {
+  for (let day = 1; day <= maxDays; day++) {
     const row: string[] = [String(day), monthLabel(day)]
     for (const s of allSeries) {
       const pt = s.points.find((p) => p.day === day)

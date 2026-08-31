@@ -50,19 +50,25 @@ const { data: articles } = await useAsyncData('research-index', () =>
         <article
           v-for="a in articles"
           :key="a.path"
-          class="group border rounded-xl p-6 hover:bg-muted/40 transition-colors"
+          class="group border rounded-xl overflow-hidden hover:bg-muted/40 transition-colors"
         >
-          <h2 class="text-xl font-medium mb-2">
-            <NuxtLink :to="a.path" class="hover:text-foreground/80">{{ a.title }}</NuxtLink>
-          </h2>
-          <p v-if="a.description" class="text-sm text-muted-foreground mb-4">{{ a.description }}</p>
-          <NuxtLink
-            :to="a.path"
-            class="inline-flex items-center gap-1.5 text-sm font-medium hover:text-foreground/80"
-          >
-            Read article
-            <ArrowRight class="size-4 transition-transform group-hover:translate-x-0.5" />
-          </NuxtLink>
+          <div class="w-full aspect-[16/8] bg-muted/40 border-b flex items-center justify-center">
+            <img v-if="a.image" :src="a.image" :alt="a.title" class="w-full h-full object-cover" />
+            <BookOpen v-else class="size-7 text-muted-foreground/40" />
+          </div>
+          <div class="p-5">
+            <h2 class="text-xl font-medium mb-2">
+              <NuxtLink :to="a.path" class="hover:text-foreground/80">{{ a.title }}</NuxtLink>
+            </h2>
+            <p v-if="a.description" class="text-sm text-muted-foreground mb-4">{{ a.description }}</p>
+            <NuxtLink
+              :to="a.path"
+              class="inline-flex items-center gap-1.5 text-sm font-medium hover:text-foreground/80"
+            >
+              Read article
+              <ArrowRight class="size-4 transition-transform group-hover:translate-x-0.5" />
+            </NuxtLink>
+          </div>
         </article>
       </div>
     </div>

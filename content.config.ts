@@ -9,6 +9,8 @@ export default defineContentConfig({
         title: { type: 'string' },
         description: { type: 'string' },
         publishedOn: { type: 'date' },
+        image: { type: 'string' },
+        thumbnail: { type: 'string' },
         tags: { type: 'array' },
       },
     }),
