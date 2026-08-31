@@ -22,7 +22,7 @@ const { data: articles } = await useAsyncData('home-research', () =>
   queryCollection('research')
     .select('title', 'description', 'meta', 'path')
     .all()
-    .then((docs: any[]) => docs.map((d) => ({ ...d, image: d.meta?.image }))),
+    .then((docs: any[]) => docs.map((d) => ({ ...d, symbol: d.meta?.tags?.[0] ?? d.title.split(' ')[0] }))),
 )
 
 const searchOpen = ref(false)
@@ -163,9 +163,8 @@ const nameFor = (symbol: string) => {
             :to="a.path"
             class="group border rounded-xl overflow-hidden hover:bg-muted/40 transition-colors"
           >
-            <div class="aspect-[16/8] bg-muted/40 border-b flex items-center justify-center">
-              <img v-if="a.image" :src="a.image" :alt="a.title" class="w-full h-full object-cover" />
-              <FileText v-else class="size-6 text-muted-foreground/40 group-hover:text-muted-foreground/60 transition-colors" />
+            <div class="aspect-[16/8] border-b">
+              <ArticleThumbnail :symbol="a.symbol" />
             </div>
             <div class="p-4">
               <h3 class="font-medium leading-snug group-hover:text-foreground/80">{{ a.title }}</h3>
