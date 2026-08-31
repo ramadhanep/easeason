@@ -21,13 +21,13 @@ const { data: articles } = await useAsyncData('research-index', () =>
 
 <template>
   <div class="min-h-screen bg-background text-foreground">
-    <div class="mx-auto max-w-3xl px-4 py-16">
+    <div class="mx-auto max-w-5xl px-4 py-16">
       <header class="mb-12 flex items-center justify-between">
         <NuxtLink
           to="/"
-          class="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          class="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
         >
-          <ArrowLeft class="size-4" /> easeason
+          <ArrowLeft class="size-4" /> Home
         </NuxtLink>
         <Button
           variant="ghost"
@@ -41,12 +41,11 @@ const { data: articles } = await useAsyncData('research-index', () =>
       </header>
 
       <div class="flex items-center gap-2 mb-3">
-        <BookOpen class="size-5 text-muted-foreground" />
         <h1 class="text-3xl font-semibold tracking-tight">Research</h1>
       </div>
       <p class="text-muted-foreground mb-12">Independent notes on market seasonality.</p>
 
-      <div class="grid gap-6">
+      <div class="grid gap-6 sm:grid-cols-2">
         <article
           v-for="a in articles"
           :key="a.path"
