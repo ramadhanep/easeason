@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Moon, Sun, Search, Landmark, Bitcoin, Globe2, Database, FileText, ArrowRight } from '@lucide/vue'
+import { Moon, Sun, Search, FileText, ArrowRight } from '@lucide/vue'
 
 const router = useRouter()
 const colorMode = useColorMode()
@@ -120,30 +120,11 @@ const popular = ['NVDA', 'BTC-USD', 'SPY', 'QQQ', 'ETH-USD']
           <button
             v-for="sym in popular"
             :key="sym"
-            class="inline-flex items-center gap-1.5 border rounded-full px-4 py-1.5 text-sm hover:bg-muted transition-colors"
+            class="inline-flex items-center gap-1.5 border rounded-full px-4 py-1.5 text-sm hover:bg-muted transition-colors cursor-pointer"
             @click="router.push(`/explore/${sym}`)"
           >
             {{ sym }}
           </button>
-        </div>
-      </div>
-
-      <div class="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-4 text-center">
-        <div class="border rounded-lg p-4 flex flex-col items-center gap-1.5">
-          <Landmark class="size-4 text-muted-foreground" />
-          <span class="text-xs text-muted-foreground">US Stocks</span>
-        </div>
-        <div class="border rounded-lg p-4 flex flex-col items-center gap-1.5">
-          <Bitcoin class="size-4 text-muted-foreground" />
-          <span class="text-xs text-muted-foreground">Crypto</span>
-        </div>
-        <div class="border rounded-lg p-4 flex flex-col items-center gap-1.5">
-          <Globe2 class="size-4 text-muted-foreground" />
-          <span class="text-xs text-muted-foreground">IDX Stocks</span>
-        </div>
-        <div class="border rounded-lg p-4 flex flex-col items-center gap-1.5">
-          <Database class="size-4 text-muted-foreground" />
-          <span class="text-xs text-muted-foreground">Indices</span>
         </div>
       </div>
 

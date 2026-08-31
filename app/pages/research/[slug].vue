@@ -11,6 +11,14 @@ const isDark = computed(() => colorMode.value === 'dark')
 const mounted = ref(false)
 onMounted(() => { mounted.value = true })
 
+const backPath = computed(() => {
+  const from = (route.meta as any).from as string | undefined
+  if (from && from.startsWith('/explore')) return '/'
+  if (from === '/') return '/'
+  return '/research'
+})
+const backLabel = computed(() => (backPath.value === '/' ? 'Home' : 'Research'))
+
 useHead({
   title: page.value?.title ? `${page.value.title} | easeason` : 'easeason',
 })
@@ -20,8 +28,8 @@ useHead({
   <div class="min-h-screen bg-background text-foreground">
     <div class="mx-auto max-w-3xl px-4 py-16">
       <header class="mb-10 flex items-center justify-between">
-        <NuxtLink to="/research" class="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1.5">
-          <ArrowLeft class="size-4" /> Research
+        <NuxtLink :to="backPath" class="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1.5 cursor-pointer">
+          <ArrowLeft class="size-4" /> {{ backLabel }}
         </NuxtLink>
         <Button
           variant="ghost"

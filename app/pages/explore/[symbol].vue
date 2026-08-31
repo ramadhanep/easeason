@@ -51,9 +51,9 @@ function exportMarkdown() {
       <header class="mb-8 flex items-center justify-between">
         <NuxtLink
           to="/"
-          class="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          class="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
         >
-          <ArrowLeft class="size-4" /> easeason
+          <ArrowLeft class="size-4" /> Home
         </NuxtLink>
         <Button
           variant="ghost"
@@ -121,11 +121,11 @@ function exportMarkdown() {
             </Select>
           </div>
           <div class="flex items-center gap-2">
-            <Button @click="exportMarkdown()" class="gap-1.5">
-              <FileDown class="size-4" /> Download .md for AI context
-            </Button>
-            <Button variant="ghost" size="sm" class="gap-1.5" @click="chartRef?.exportPng()">
+            <Button variant="outline" size="sm" class="gap-1.5 cursor-pointer" @click="chartRef?.exportPng()">
               <Download class="size-4" /> PNG
+            </Button>
+            <Button @click="exportMarkdown()" class="gap-1.5 cursor-pointer">
+              <FileDown class="size-4" /> .md for AI context
             </Button>
           </div>
         </div>
