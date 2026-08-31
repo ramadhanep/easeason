@@ -1,0 +1,110 @@
+symbol,name
+BTC-USD,Bitcoin
+ETH-USD,Ethereum
+SOL-USD,Solana
+BNB-USD,Binance Coin
+^IXIC,NASDAQ Composite
+^GSPC,S&P 500
+^JKSE,Jakarta Composite Index
+BBCA.JK,Bank Central Asia Tbk
+BBRI.JK,Bank Rakyat Indonesia Tbk
+AAPL,Apple Inc
+MSFT,Microsoft Corp
+NVDA,NVIDIA Corporation
+AMZN,Amazon.com Inc
+GOOGL,Alphabet Inc Class A
+META,Meta Platforms Inc
+TSLA,Tesla Inc
+AVGO,Broadcom Inc
+COST,Costco Wholesale Corp
+AMD,Advanced Micro Devices Inc
+NFLX,Netflix Inc
+ADBE,Adobe Inc
+INTC,Intel Corporation
+QCOM,QUALCOMM Incorporated
+AMAT,Applied Materials Inc
+INTU,Intuit Inc
+PYPL,PayPal Holdings Inc
+MRVL,Marvell Technology Inc
+LRCX,Lam Research Corporation
+ASML,ASML Holding NV
+ARM,Arm Holdings plc
+CRWD,CrowdStrike Holdings Inc
+PANW,Palo Alto Networks Inc
+SNOW,Snowflake Inc
+SHOP,Shopify Inc
+ABNB,Airbnb Inc
+UBER,Uber Technologies Inc
+MU,Micron Technology Inc
+TSM,Taiwan Semiconductor Manufacturing Co Ltd
+BMRI.JK,Bank Mandiri Tbk
+CTRA.JK,Ciputra Development Tbk
+TLKM.JK,Telkom Indonesia Tbk
+ASII.JK,Astra International Tbk
+BBNI.JK,Bank Negara Indonesia Tbk
+AMMN.JK,Amman Mineral Internasional Tbk
+ADRO.JK,Adaro Energy Indonesia Tbk
+ICBP.JK,Indofood CBP Sukses Makmur Tbk
+BREN.JK,Barito Renewables Energy Tbk
+TOWR.JK,Sarana Menara Nusantara Tbk
+MDKA.JK,Merdeka Copper Gold Tbk
+ANTM.JK,Aneka Tambang Tbk
+INCO.JK,Vale Indonesia Tbk
+PTBA.JK,Bukit Asam Tbk
+UNVR.JK,Unilever Indonesia Tbk
+INDF.JK,Indofood Sukses Makmur Tbk
+AMRT.JK,Sumber Alfaria Trijaya Tbk
+MAPI.JK,Mitra Adiperkasa Tbk
+ERAA.JK,Erajaya Swasembada Tbk
+GOTO.JK,GoTo Gojek Tokopedia Tbk
+BRIS.JK,Bank Syariah Indonesia Tbk
+BMHS.JK,Bunda Medik Healthcare Systems Tbk
+UNTR.JK,United Tractors Tbk
+KLBF.JK,Kalbe Farma Tbk
+CPIN.JK,Charoen Pokphand Indonesia Tbk
+JPFA.JK,Japfa Comfeed Indonesia Tbk
+SMGR.JK,Semen Indonesia (Persero) Tbk
+INTP.JK,Indocement Tunggal Prakarsa Tbk
+EXCL.JK,XL Axiata Tbk
+ISAT.JK,Indosat Tbk
+TBIG.JK,Tower Bersama Infrastructure Tbk
+BRPT.JK,Barito Pacific Tbk
+MEDC.JK,Medco Energi Internasional Tbk
+ITMG.JK,Indo Tambangraya Megah Tbk
+HRUM.JK,Harum Energy Tbk
+ADMR.JK,Adaro Minerals Indonesia Tbk
+TINS.JK,Timah Tbk
+AKRA.JK,AKR Corporindo Tbk
+PGAS.JK,Perusahaan Gas Negara Tbk
+BSDE.JK,Bumi Serpong Damai Tbk
+PWON.JK,Pakuwon Jati Tbk
+SMRA.JK,Summarecon Agung Tbk
+MYOR.JK,Mayora Indah Tbk
+ARTO.JK,Bank Jago Tbk
+BUKA.JK,Bukalapak.com Tbk
+EMTK.JK,Elang Mahkota Teknologi Tbk
+BBYB.JK,Bank Neo Commerce Tbk
+ESSA.JK,Surya Esa Perkasa Tbk
+RAJA.JK,Rukun Raharja Tbk
+SIDO.JK,Industri Jamu dan Farmasi Sido Muncul Tbk
+MIKA.JK,Mitra Keluarga Karyasehat Tbk
+ACES.JK,Ace Hardware Indonesia Tbk
+JSMR.JK,Jasa Marga (Persero) Tbk
+INDY.JK,Indika Energy Tbk
+SMCB.JK,Solusi Bangun Indonesia Tbk
+WIKA.JK,Wijaya Karya (Persero) Tbk
+WSKT.JK,Waskita Karya (Persero) Tbk
+PTPP.JK,PP (Persero) Tbk
+ADHI.JK,Adhi Karya (Persero) Tbk
+BFIN.JK,BFI Finance Indonesia Tbk
+BBTN.JK,Bank Tabungan Negara (Persero) Tbk
+BJBR.JK,Bank Pembangunan Daerah Jawa Barat Tbk
+BJTM.JK,Bank Pembangunan Daerah Jawa Timur Tbk
+NCKL.JK,Trimegah Bangun Persada Tbk
+SMDR.JK,Samudera Indonesia Tbk
+ELSA.JK,Elnusa Tbk
+DOID.JK,Delta Dunia Makmur Tbk
+PGEO.JK,Pertamina Geothermal Energy Tbk
+MTEL.JK,Dayamitra Telekomunikasi Tbk
+QQQ,Invesco QQQ Trust
+SPY,SPDR S&P 500 ETF Trust
