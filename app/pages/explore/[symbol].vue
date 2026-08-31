@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ArrowLeft, Moon, Sun, Download, CalendarRange, BarChart3, LineChart, CloudOff } from '@lucide/vue'
-
+import { ArrowLeft, Moon, Sun, Download, CalendarRange, BarChart3, LineChart, CloudOff, FileDown, Table } from '@lucide/vue'
+import { buildSeasonalMarkdown, profileDescription, type SeasonalData } from '#shared/seasonal'
 const route = useRoute()
 const symbol = computed(() => route.params.symbol as string)
 
@@ -31,6 +31,18 @@ const fmt = (n: number | undefined): string => {
 }
 
 const totalProfiles = computed(() => data.value?.profiles?.length ?? 0)
+
+function exportMarkdown() {
+  if (!data.value) return
+  const md = buildSeasonalMarkdown(data.value as SeasonalData)
+  const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.download = `easeason-${data.value.meta.symbol}-seasonality.md`
+  link.href = url
+  link.click()
+  URL.revokeObjectURL(url)
+}
 </script>
 
 <template>
@@ -108,9 +120,14 @@ const totalProfiles = computed(() => data.value?.profiles?.length ?? 0)
               </SelectContent>
             </Select>
           </div>
-          <Button variant="outline" size="sm" class="gap-1.5" @click="chartRef?.exportPng()">
-            <Download class="size-4" /> Download PNG
-          </Button>
+          <div class="flex items-center gap-2">
+            <Button variant="outline" size="sm" class="gap-1.5" @click="chartRef?.exportPng()">
+              <Download class="size-4" /> PNG
+            </Button>
+            <Button variant="outline" size="sm" class="gap-1.5" @click="exportMarkdown()">
+              <FileDown class="size-4" /> .md
+            </Button>
+          </div>
         </div>
 
         <Card>
@@ -127,6 +144,32 @@ const totalProfiles = computed(() => data.value?.profiles?.length ?? 0)
         <p class="mt-3 text-xs text-muted-foreground text-right">
           Toggle profiles from the legend · hover to inspect
         </p>
+
+        <div class="mt-10">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-medium inline-flex items-center gap-2">
+              <Table class="size-4 text-muted-foreground" /> Profiles
+            </h2>
+          </div>
+          <div v-if="data.profiles.length || data.currentYear" class="border rounded-xl divide-y">
+            <div
+              v-for="p in [...data.profiles, ...(data.currentYear ? [{ id: 'current-year', label: `${data.currentYear.year} YTD`, years: [data.currentYear.year] }] : [])]"
+              :key="p.label"
+              class="px-4 py-3 flex items-start justify-between gap-4"
+            >
+              <div>
+                <p class="font-medium text-sm">{{ p.label }}</p>
+                <p class="text-xs text-muted-foreground mt-0.5">{{ profileDescription(p.id) }}</p>
+                <p v-if="p.years.length && p.id !== 'all-years'" class="text-xs text-muted-foreground/80 mt-1 font-mono">
+                  {{ p.years.join(', ') }}
+                </p>
+              </div>
+              <span v-if="p.years.length" class="text-xs text-muted-foreground whitespace-nowrap shrink-0 font-mono">
+                {{ Math.min(...p.years) }}–{{ Math.max(...p.years) }}
+              </span>
+            </div>
+          </div>
+        </div>
 
         <footer class="mt-10 text-center text-xs text-muted-foreground">
           Historical statistics based on available market data. Not financial advice.

@@ -14,6 +14,8 @@ It is **not** a prediction engine, trading system, portfolio manager, or AI prod
 - **Seasonal profiles** — All Years, Election, Pre-Election, Mid-Term, Post-Election, Trump Years, and Current Year.
 - **Interactive chart** — hover tooltip across all visible series, legend toggles, Percentage / Growth Factor scale, responsive, dark/light theme.
 - **PNG export** — download a clean chart suited for research use.
+- **Markdown export** — on each `/explore/[symbol]` page: a "Profiles" section explains every series (year range + member years + description), and a `.md` button downloads the full seasonal data as a markdown table.
+- **AI-ready URLs** — `GET /markdown/<symbol>` (e.g. `/markdown/NVDA`) returns a `text/markdown` document an LLM/agent (Claude Web, etc.) can scan directly to understand the profiles and seasonal numbers.
 - **Research** — static Markdown articles, no CMS.
 - **Server-side data** — Yahoo Finance via `yahoo-finance2`, with per-symbol caching.
 
