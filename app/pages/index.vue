@@ -48,7 +48,7 @@ function selectSymbol(symbol: string) {
   router.push(`/explore/${symbol}`)
 }
 
-const popular = ['NVDA', 'BTC-USD', 'SPY', 'QQQ', 'ETH-USD']
+const popular = ['NVDA', 'MSFT', 'AMZN', 'GOOGL', 'META', 'TSLA', 'AAPL', 'BTC-USD', 'ETH-USD', 'SPY', 'QQQ']
 </script>
 
 <template>
