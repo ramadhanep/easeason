@@ -46,7 +46,8 @@ const chartRef = ref<VChart | null>(null)
 function exportPng() {
   const chart = chartRef.value
   if (!chart) return
-  const url = (chart as any).getDataURL?.({ pixelRatio: 2, backgroundColor: '#ffffff' })
+  const bg = props.isDark ? '#0a0a0a' : '#ffffff'
+  const url = (chart as any).getDataURL?.({ pixelRatio: 2, backgroundColor: bg })
   if (!url) return
   const link = document.createElement('a')
   link.download = 'easeason-seasonality.png'

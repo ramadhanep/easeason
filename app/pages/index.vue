@@ -52,69 +52,80 @@ const popular = ['NVDA', 'MSFT', 'AMZN', 'GOOGL', 'META', 'TSLA', 'AAPL', 'BTC-U
 </script>
 
 <template>
-  <div class="min-h-screen bg-background text-foreground">
-    <div class="mx-auto max-w-2xl px-4 py-16">
-      <div class="text-center mb-10">
-        <div class="flex justify-end mb-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="Toggle theme"
-            @click="colorMode.preference = isDark ? 'light' : 'dark'"
-          >
-            <Sun v-if="mounted && isDark" class="size-4" />
-            <Moon v-else class="size-4" />
-          </Button>
-        </div>
+  <div class="min-h-screen relative bg-background text-foreground">
+    <div class="hidden md:block fixed top-1/2 -right-12 -translate-y-1/2 z-50">
+      <span
+        class="block rotate-90 origin-center text-muted-foreground/40 font-semibold tracking-widest text-sm select-none"
+      >
+        easeason
+      </span>
+    </div>
 
-        <h1 class="text-4xl font-semibold tracking-tight mb-3">easeason</h1>
-        <p class="text-lg text-muted-foreground">Explore historical market seasonality.</p>
-        <p class="text-sm text-muted-foreground mt-1">
+    <div class="mx-auto max-w-2xl px-4 py-8">
+      <div class="rounded-[2rem] border border-white/10 dark:border-white/10 bg-white/40 dark:bg-white/[0.06] backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] mb-8 overflow-hidden p-2">
+        <div class="flex items-center gap-2">
+          <div class="flex-1 min-w-0">
+            <Popover v-model:open="searchOpen">
+              <PopoverTrigger as-child>
+                <Button
+                  variant="ghost"
+                  role="combobox"
+                  aria-expanded="searchOpen"
+                  class="w-full h-12 justify-start gap-3 rounded-[1.5rem] bg-white/50 dark:bg-white/10 px-4 text-muted-foreground font-normal backdrop-blur-xl"
+                >
+                  <Search class="size-4" />
+                  Search stocks, crypto, indices...
+                  <span class="ml-auto hidden sm:inline-flex text-xs text-muted-foreground/60">⌘K</span>
+                </Button>
+              </PopoverTrigger>
+            <PopoverContent class="w-[calc(100vw-2rem)] sm:w-[32rem] p-0 rounded-[1.25rem] overflow-hidden backdrop-blur-2xl" align="start" :side-offset="10">
+              <Command v-model:search-term="searchQuery">
+                <CommandInput placeholder="Search stocks, crypto, indices..." />
+                <CommandList>
+                  <CommandEmpty>No assets found.</CommandEmpty>
+                  <template v-for="g in filtered" :key="g.label">
+                    <CommandGroup :heading="g.label">
+                      <CommandItem
+                        v-for="s in g.items"
+                        :key="s.symbol"
+                        :value="s.symbol"
+                        class="flex items-center justify-between gap-3"
+                        @select="selectSymbol(s.symbol)"
+                      >
+                        <span class="flex items-center gap-2">
+                          <span class="font-medium">{{ s.symbol }}</span>
+                          <span class="text-sm text-muted-foreground truncate">{{ s.name }}</span>
+                        </span>
+                        <ArrowRight class="size-4 text-muted-foreground/60" />
+                      </CommandItem>
+                    </CommandGroup>
+                  </template>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
+        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="Toggle theme"
+          class="rounded-full bg-white/50 dark:bg-white/10 size-12 shrink-0 cursor-pointer"
+          @click="colorMode.preference = isDark ? 'light' : 'dark'"
+        >
+          <Sun v-if="mounted && isDark" class="size-5" />
+          <Moon v-else class="size-5" />
+        </Button>
+      </div>
+      </div>
+
+      <div class="text-center">
+        <h2 class="text-3xl font-semibold tracking-tight">Explore historical market seasonality</h2>
+        <p class="text-sm text-muted-foreground mt-2">
           See how stocks, crypto, and indices historically move throughout the year.
         </p>
       </div>
 
-      <Popover v-model:open="searchOpen">
-        <PopoverTrigger as-child>
-          <Button
-            variant="outline"
-            role="combobox"
-            aria-expanded="searchOpen"
-            class="w-full h-12 justify-start gap-3 px-4 text-muted-foreground font-normal"
-          >
-            <Search class="size-4" />
-            Search stocks, crypto, indices...
-            <span class="ml-auto hidden sm:inline-flex text-xs text-muted-foreground/60">⌘K</span>
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent class="w-[calc(100vw-2rem)] sm:w-[32rem] p-0" align="start" :side-offset="8">
-          <Command v-model:search-term="searchQuery">
-            <CommandInput placeholder="Search stocks, crypto, indices..." />
-            <CommandList>
-              <CommandEmpty>No assets found.</CommandEmpty>
-              <template v-for="g in filtered" :key="g.label">
-                <CommandGroup :heading="g.label">
-                  <CommandItem
-                    v-for="s in g.items"
-                    :key="s.symbol"
-                    :value="s.symbol"
-                    class="flex items-center justify-between gap-3"
-                    @select="selectSymbol(s.symbol)"
-                  >
-                    <span class="flex items-center gap-2">
-                      <span class="font-medium">{{ s.symbol }}</span>
-                      <span class="text-sm text-muted-foreground truncate">{{ s.name }}</span>
-                    </span>
-                    <ArrowRight class="size-4 text-muted-foreground/60" />
-                  </CommandItem>
-                </CommandGroup>
-              </template>
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
-
-      <div v-if="!searchOpen" class="mt-8">
+      <div class="mt-8">
         <p class="text-xs uppercase tracking-wide text-muted-foreground mb-3">Popular</p>
         <div class="flex flex-wrap gap-2">
           <button

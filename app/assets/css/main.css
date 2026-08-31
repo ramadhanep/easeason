@@ -89,6 +89,9 @@
   body {
     @apply bg-background text-foreground;
   }
+  [data-reka-popper-content-wrapper] {
+    margin-top: 1px;
+  }
 }
 
 @layer components {

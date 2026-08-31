@@ -4,9 +4,9 @@ import { defineEventHandler } from 'h3'
 
 const GROUPS: Array<{ key: string; label: string; test: (s: string) => boolean }> = [
   { key: 'crypto', label: 'Crypto', test: (s) => s.endsWith('-USD') },
-  { key: 'idx', label: 'Indices', test: (s) => s.startsWith('^') && s.endsWith('JKSE') || s.startsWith('^IXIC') || s.startsWith('^GSPC') },
+  { key: 'idx', label: 'Indices', test: (s) => s.startsWith('^') },
+  { key: 'us-stock', label: 'US Stocks', test: (s) => !s.endsWith('.JK') && !s.endsWith('-USD') && !s.startsWith('^') },
   { key: 'id-stock', label: 'IDX Stocks', test: (s) => s.endsWith('.JK') },
-  { key: 'us-stock', label: 'US Stocks', test: () => true },
 ]
 
 export default defineEventHandler(() => {

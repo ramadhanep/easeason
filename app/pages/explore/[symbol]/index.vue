@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ArrowLeft, Moon, Sun, Download, CalendarRange, BarChart3, LineChart, CloudOff, FileDown, Table } from '@lucide/vue'
-import { buildSeasonalMarkdown, profileDescription, type SeasonalData } from '#shared/seasonal'
+import { ArrowLeft, Moon, Sun, Download, CloudOff, FileText } from '@lucide/vue'
+import { profileDescription } from '#shared/seasonal'
 const route = useRoute()
 const symbol = computed(() => route.params.symbol as string)
 
@@ -31,18 +31,6 @@ const fmt = (n: number | undefined): string => {
 }
 
 const totalProfiles = computed(() => data.value?.profiles?.length ?? 0)
-
-function exportMarkdown() {
-  if (!data.value) return
-  const md = buildSeasonalMarkdown(data.value as SeasonalData)
-  const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' })
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.download = `easeason-${data.value.meta.symbol}-seasonality.md`
-  link.href = url
-  link.click()
-  URL.revokeObjectURL(url)
-}
 </script>
 
 <template>
@@ -86,72 +74,65 @@ function exportMarkdown() {
       </div>
 
       <div v-else-if="data">
-        <div class="mb-8 flex items-end justify-between flex-wrap gap-4">
-          <div>
-            <h1 class="text-3xl font-semibold tracking-tight flex items-center gap-3">
-              {{ symbol }}
-              <span class="text-sm font-normal text-muted-foreground">{{ data.meta.name }}</span>
-            </h1>
-            <div class="flex items-center gap-4 mt-3 text-sm text-muted-foreground flex-wrap">
-              <span v-if="data.meta.currentPrice" class="flex items-center gap-1.5">
-                <BarChart3 class="size-4" /> {{ fmt(data.meta.currentPrice) }}
-              </span>
-              <span v-if="data.meta.firstYear" class="flex items-center gap-1.5">
-                <CalendarRange class="size-4" />
-                {{ data.meta.firstYear }} – {{ data.meta.lastYear }}
-              </span>
-              <span class="flex items-center gap-1.5">
-                <LineChart class="size-4" /> {{ totalProfiles }} profiles
-              </span>
+        <div class="mb-6">
+          <div class="flex items-end gap-2">
+            <h1 class="text-3xl font-bold tracking-tight">{{ symbol }}</h1>
+            <span class="text-base font-medium text-muted-foreground mb-1">{{ data.meta.name }}</span>
+          </div>
+          <div class="mt-2 flex items-end gap-4 flex-wrap">
+            <div v-if="data.meta.currentPrice" class="flex items-baseline gap-2">
+              <span class="text-2xl font-semibold">{{ fmt(data.meta.currentPrice) }}</span>
+              <span class="text-sm text-muted-foreground">Current</span>
+            </div>
+            <div v-if="data.meta.firstYear" class="text-sm text-muted-foreground">
+              {{ data.meta.firstYear }} – {{ data.meta.lastYear }}
+            </div>
+            <div class="text-sm text-muted-foreground">{{ totalProfiles }} profiles</div>
+          </div>
+        </div>
+
+        <div class="rounded-[2rem] bg-background/40 backdrop-blur-xl">
+          <div class="mb-3 flex items-center justify-between gap-3 flex-wrap px-1">
+            <div class="inline-flex items-center gap-1 rounded-full bg-muted p-1">
+              <button
+                :class="yKey === 'pct' ? 'bg-background shadow-sm' : 'text-muted-foreground'"
+                class="rounded-full px-4 py-1.5 text-sm font-medium transition-colors cursor-pointer"
+                @click="yKey = 'pct'"
+              >
+                Percentage
+              </button>
+              <button
+                :class="yKey === 'factor' ? 'bg-background shadow-sm' : 'text-muted-foreground'"
+                class="rounded-full px-4 py-1.5 text-sm font-medium transition-colors cursor-pointer"
+                @click="yKey = 'factor'"
+              >
+                Growth Factor
+              </button>
+            </div>
+            <div class="flex items-center gap-2">
+              <Button variant="outline" size="sm" class="gap-1.5 cursor-pointer rounded-full" @click="chartRef?.exportPng()">
+                <Download class="size-4" /> .PNG
+              </Button>
+              <NuxtLink :to="`/explore/${symbol}/context`" class="inline-flex items-center gap-1.5 rounded-full border border-input bg-transparent px-3 py-1.5 text-sm shadow-xs hover:bg-accent hover:text-accent-foreground cursor-pointer">
+                <FileText class="size-4" /> Context
+              </NuxtLink>
             </div>
           </div>
-        </div>
 
-        <div class="mb-3 flex items-center justify-between flex-wrap gap-3">
-          <div class="flex items-center gap-3">
-            <Label class="text-sm text-muted-foreground">Scale</Label>
-            <Select v-model="yKey">
-              <SelectTrigger class="w-44">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="pct">Percentage</SelectItem>
-                <SelectItem value="factor">Growth Factor</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div class="flex items-center gap-2">
-            <Button variant="outline" size="sm" class="gap-1.5 cursor-pointer" @click="chartRef?.exportPng()">
-              <Download class="size-4" /> .PNG
-            </Button>
-            <Button @click="exportMarkdown()" variant="outline" class="gap-1.5 cursor-pointer">
-              <FileDown class="size-4" /> .MD
-            </Button>
-          </div>
+          <ClientOnly>
+            <SeasonalChart ref="chartRef" :profiles="data.profiles" :current-year="data.currentYear" :y-key="yKey" :is-dark="isDark" />
+            <template #fallback>
+              <Skeleton class="h-[480px] w-full" />
+            </template>
+          </ClientOnly>
         </div>
-
-        <Card>
-          <CardContent class="p-4">
-            <ClientOnly>
-              <SeasonalChart ref="chartRef" :profiles="data.profiles" :current-year="data.currentYear" :y-key="yKey" :is-dark="isDark" />
-              <template #fallback>
-                <Skeleton class="h-[480px] w-full" />
-              </template>
-            </ClientOnly>
-          </CardContent>
-        </Card>
 
         <p class="mt-3 text-xs text-muted-foreground text-right">
           Toggle profiles from the legend · hover to inspect
         </p>
 
         <div class="mt-10">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-medium inline-flex items-center gap-2">
-              <Table class="size-4 text-muted-foreground" /> Profiles
-            </h2>
-          </div>
-          <div v-if="data.profiles.length || data.currentYear" class="border rounded-xl divide-y">
+          <div v-if="data.profiles.length || data.currentYear" class="rounded-2xl border border-border/40 divide-y bg-background/40 backdrop-blur-xl overflow-hidden">
             <div
               v-for="p in [...data.profiles, ...(data.currentYear ? [{ id: 'current-year', label: `${data.currentYear.year} YTD`, years: [data.currentYear.year] }] : [])]"
               :key="p.label"
