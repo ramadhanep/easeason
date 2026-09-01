@@ -30,10 +30,11 @@ const fmt = (n: number | undefined): string => {
 
 const totalProfiles = computed(() => data.value?.profiles?.length ?? 0)
 
-const { data: relatedArticles } = await useAsyncData(`related-${symbol}`, () =>
+const { data: relatedArticles } = await useAsyncData(`related-${symbol.value}`, () =>
   queryCollection('research')
     .select('title', 'description', 'meta', 'path')
     .all()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     .then((docs: any[]) =>
       docs
         .map((d) => ({ ...d, symbol: d.meta?.tags?.[0] ?? d.title.split(' ')[0] }))

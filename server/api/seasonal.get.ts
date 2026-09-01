@@ -36,6 +36,7 @@ export default defineEventHandler(async (event) => {
 
   try {
     return await fetchDataWithCache(symbol)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (error.statusCode) throw error
     throw createError({

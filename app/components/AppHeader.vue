@@ -61,5 +61,5 @@ onMounted(() => { mounted.value = true })
       </div>
     </div>
   </div>
-  <div class="h-20" aria-hidden="true"></div>
+  <div class="h-20" aria-hidden="true"/>
 </template>

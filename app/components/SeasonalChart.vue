@@ -48,6 +48,7 @@ function exportPng() {
   const chart = chartRef.value
   if (!chart) return
   const bg = props.isDark ? '#0a0a0a' : '#ffffff'
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const url = (chart as any).getDataURL?.({ pixelRatio: 2, backgroundColor: bg })
   if (!url) return
   const link = document.createElement('a')
@@ -79,6 +80,7 @@ const option = computed(() => {
   const tooltipBg = props.isDark ? 'rgba(17,24,39,0.95)' : 'rgba(255,255,255,0.95)'
   const tooltipBorder = props.isDark ? '#374151' : '#e5e7eb'
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const allSeries: any[] = []
 
   for (const profile of props.profiles) {
@@ -111,12 +113,12 @@ const option = computed(() => {
 
   return {
     backgroundColor: 'transparent',
-    grid: { left: 56, right: 20, top: 30, bottom: 50 },
     tooltip: {
       trigger: 'axis',
       backgroundColor: tooltipBg,
       borderColor: tooltipBorder,
       textStyle: { color: textColor, fontSize: 12 },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       formatter: (params: any[]) => {
         if (!params.length) return ''
         const day = params[0].data[0]

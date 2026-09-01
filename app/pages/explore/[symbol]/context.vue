@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Copy, Check, FileText } from '@lucide/vue'
+import { Copy, Check } from '@lucide/vue'
 
 const route = useRoute()
 const symbol = computed(() => route.params.symbol as string)
@@ -38,7 +38,7 @@ async function copyText() {
             Clean markdown summary ready to paste into your AI tools.
           </p>
         </div>
-        <Button variant="outline" size="sm" class="gap-1.5 cursor-pointer rounded-full" @click="copyText" :disabled="!md">
+        <Button variant="outline" size="sm" class="gap-1.5 cursor-pointer rounded-full" :disabled="!md" @click="copyText">
           <Check v-if="copied" class="size-4" />
           <Copy v-else class="size-4" />
           {{ copied ? 'Copied' : 'Copy' }}

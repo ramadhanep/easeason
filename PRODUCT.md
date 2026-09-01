@@ -55,7 +55,7 @@ The application can be fully public.
 
 ### Asset exploration
 
-- Curated asset list from `server/data/stocks.csv`.
+- Curated asset list from `server/utils/stocks-data.ts`.
 - Categories:
   - Crypto
   - US Stocks
@@ -447,10 +447,8 @@ server/
 ├── api/
 │   └── seasonal.get.ts
 │
-├── data/
-│   └── stocks.csv
-│
 ├── utils/
+│   ├── stocks-data.ts    # curated asset list
 │   ├── yahoo.ts
 │   └── seasonal.ts
 │

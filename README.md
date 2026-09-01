@@ -108,9 +108,7 @@ easeason/
 │   └── research/          # static Markdown articles
 ├── server/
 │   ├── api/               # /api/seasonal, /api/symbols
-│   ├── data/              # curated asset list (stocks.csv)
-│   ├── routes/markdown/   # /markdown/<symbol>
-│   └── utils/             # math, seasonal, stocks
+│   └── utils/             # math, seasonal, stocks + curated asset list (stocks-data.ts)
 ├── shared/                # types + markdown builder shared with server/api
 ├── public/img/            # generated thumbnail charts
 ├── tests/                 # vitest

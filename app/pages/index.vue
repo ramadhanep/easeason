@@ -22,6 +22,7 @@ const { data: articles } = await useAsyncData('home-research', () =>
   queryCollection('research')
     .select('title', 'description', 'meta', 'path')
     .all()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     .then((docs: any[]) =>
       docs
         .map((d) => ({ ...d, symbol: d.meta?.tags?.[0] ?? d.title.split(' ')[0] }))
@@ -139,7 +140,7 @@ const nameFor = (symbol: string) => {
         </div>
       </div>
       </div>
-      <div class="h-20" aria-hidden="true"></div>
+      <div class="h-20" aria-hidden="true"/>
 
       <div class="text-center">
         <h2 class="text-3xl font-semibold tracking-tight">easeason</h2>

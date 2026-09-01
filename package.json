@@ -1,5 +1,5 @@
 {
-  "name": "nuxttmp",
+  "name": "easeason",
   "type": "module",
   "private": true,
   "scripts": {
@@ -7,6 +7,8 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "test": "vitest run",
     "postinstall": "nuxt prepare"
   },
@@ -15,13 +17,11 @@
     "@nuxt/content": "^3.16.0",
     "@nuxtjs/color-mode": "^4.0.1",
     "@vite-pwa/nuxt": "^1.1.1",
-    "@vitejs/plugin-vue": "^6.0.8",
     "@vueuse/core": "^14.4.0",
     "better-sqlite3": "^13.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "echarts": "^6.1.0",
-    "lucide-vue-next": "^1.0.0",
     "radix-vue": "^1.9.17",
     "reka-ui": "^2.10.4",
     "tailwind-merge": "^3.6.0",
@@ -33,6 +33,7 @@
     "yahoo-finance2": "^4.0.2"
   },
   "devDependencies": {
+    "@nuxt/eslint": "^1.17.0",
     "@nuxtjs/tailwindcss": "^7.0.0-beta.1",
     "@tailwindcss/vite": "^4.3.3",
     "nuxt": "^4.2.2",

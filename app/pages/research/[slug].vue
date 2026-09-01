@@ -5,6 +5,7 @@ const { data: page } = await useAsyncData(route.path, () =>
 )
 
 const backPath = computed(() => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const from = (route.meta as any).from as string | undefined
   if (from && from.startsWith('/explore')) return from
   if (from === '/') return '/'

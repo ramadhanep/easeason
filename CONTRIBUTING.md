@@ -76,7 +76,7 @@ Then on GitHub, open a PR from your branch to the `main` branch of the upstream 
 
 - **Research articles** — add a `content/research/<symbol>-seasonality.md` Markdown file following the existing article format (see `aapl-seasonality.md`). It should reference an image in `public/img/` and include accurate data.
 - **Bug fixes** — especially for the chart, seasonal math, or article rendering.
-- **Data fixes** — the curated asset list lives in `server/data/`.
+- **Data fixes** — the curated asset list lives in `server/utils/stocks-data.ts`.
 - **Documentation** — README, this file, or code comments.
 - **UI/UX polish** — consistent with the existing glass-card, brand-color design language.
 

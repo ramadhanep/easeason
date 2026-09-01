@@ -2,8 +2,8 @@
 title: "NVDA Seasonality Through the Election Cycle"
 description: "How NVIDIA historically moved across election-cycle profiles, monthly checkpoints, and 2026 year-to-date."
 publishedOn: 2026-08-31
-image: /img/nvda-seasonality-thumbnail.png
-thumbnail: /img/nvda-seasonality-thumbnail.png
+image: /img/easeason-seasonality-nvda.png
+thumbnail: /img/easeason-seasonality-nvda.png
 tags:
   - NVDA
   - election-cycle
