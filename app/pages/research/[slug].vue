@@ -13,7 +13,13 @@ const backPath = computed(() => {
 })
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const meta = computed<Record<string, any>>(() => (page.value?.meta as any) ?? {})
-const backSymbol = computed(() => (meta.value.tags?.[0] as string) ?? '')
+const symbolTag = computed(() => {
+  const tags = (meta.value.tags ?? []) as string[]
+  const symbolTags = tags.filter((t) => t in BRAND_COLORS)
+  return symbolTags.length ? symbolTags[symbolTags.length - 1] : ''
+})
+const backSymbol = computed(() => symbolTag.value)
+const brand = computed(() => BRAND_COLORS[symbolTag.value])
 const backLabel = computed(() => {
   if (backPath.value.startsWith('/explore')) return `Explore ${backSymbol.value}`
   return backPath.value === '/' ? 'Home' : 'Research'
@@ -27,7 +33,7 @@ useHead({
 <template>
   <div class="min-h-screen bg-background text-foreground">
     <div class="mx-auto max-w-3xl px-4 py-16">
-      <AppHeader :to="backPath" :label="backLabel" />
+      <AppHeader :to="backPath" :label="backLabel" :brand="brand" />
 
       <div v-if="page">
         <div v-if="meta.publishedOn" class="text-sm text-muted-foreground mb-6">
