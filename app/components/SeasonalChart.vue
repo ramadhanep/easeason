@@ -174,6 +174,13 @@ const option = computed(() => {
 
 <template>
   <div class="h-[540px] w-full">
-    <VChart ref="chartRef" :option="option" autoresize class="h-full w-full" />
+    <VChart
+      ref="chartRef"
+      :option="option"
+      autoresize
+      role="img"
+      aria-label="Seasonal performance chart. Toggle profiles from the legend."
+      class="h-full w-full"
+    />
   </div>
 </template>

@@ -99,6 +99,7 @@ const fg = computed(() => {
                 :class="yKey === 'pct' ? 'shadow-sm' : 'text-muted-foreground'"
                 :style="yKey === 'pct' ? { backgroundColor: bg ?? 'var(--background)', color: fg } : {}"
                 class="rounded-full px-4 py-1.5 text-sm font-medium transition-colors cursor-pointer"
+                :aria-pressed="yKey === 'pct'"
                 @click="yKey = 'pct'"
               >
                 Percentage
@@ -107,6 +108,7 @@ const fg = computed(() => {
                 :class="yKey === 'factor' ? 'shadow-sm' : 'text-muted-foreground'"
                 :style="yKey === 'factor' ? { backgroundColor: bg ?? 'var(--background)', color: fg } : {}"
                 class="rounded-full px-4 py-1.5 text-sm font-medium transition-colors cursor-pointer"
+                :aria-pressed="yKey === 'factor'"
                 @click="yKey = 'factor'"
               >
                 Growth Factor
