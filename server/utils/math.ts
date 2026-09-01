@@ -8,7 +8,7 @@ export const CYCLE_LABELS: Record<number, string> = {
 export const TRUMP_YEARS = [2016, 2017, 2018, 2019, 2024, 2025]
 
 export function getElectionCycleLabel(year: number): string {
-  return CYCLE_LABELS[year % 4]
+  return CYCLE_LABELS[year % 4]!
 }
 
 export type RetRow = { doy: number; year: number; ret: number }

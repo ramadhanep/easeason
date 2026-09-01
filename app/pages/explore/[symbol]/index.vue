@@ -155,7 +155,7 @@ const fg = computed(() => {
           </div>
         </div>
 
-        <div v-if="relatedArticles.length" class="mt-10">
+        <div v-if="relatedArticles && relatedArticles.length" class="mt-10">
           <h2 class="text-lg font-medium mb-4">Related research</h2>
           <div class="grid gap-4 sm:grid-cols-2">
             <NuxtLink

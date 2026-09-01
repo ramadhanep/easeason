@@ -159,7 +159,7 @@ const nameFor = (symbol: string) => {
             v-for="sym in popular"
             :key="sym"
             class="group flex flex-col justify-between rounded-2xl p-4 text-left hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer"
-            :style="{ backgroundColor: BRAND_COLORS[sym], color: brandTextColor(BRAND_COLORS[sym]) }"
+            :style="{ backgroundColor: BRAND_COLORS[sym], color: brandTextColor(BRAND_COLORS[sym]!) }"
             @click="router.push(`/explore/${sym}`)"
           >
             <div class="flex items-center justify-between">

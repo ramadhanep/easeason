@@ -11,7 +11,9 @@ const backPath = computed(() => {
   if (from === '/') return '/'
   return '/research'
 })
-const backSymbol = computed(() => page.value?.meta?.tags?.[0] ?? '')
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const meta = computed<Record<string, any>>(() => (page.value?.meta as any) ?? {})
+const backSymbol = computed(() => (meta.value.tags?.[0] as string) ?? '')
 const backLabel = computed(() => {
   if (backPath.value.startsWith('/explore')) return `Explore ${backSymbol.value}`
   return backPath.value === '/' ? 'Home' : 'Research'
@@ -28,8 +30,8 @@ useHead({
       <AppHeader :to="backPath" :label="backLabel" />
 
       <div v-if="page">
-        <div v-if="page.meta?.publishedOn" class="text-sm text-muted-foreground mb-6">
-          {{ new Date(page.meta.publishedOn).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) }}
+        <div v-if="meta.publishedOn" class="text-sm text-muted-foreground mb-6">
+          {{ new Date(meta.publishedOn).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) }}
         </div>
         <ContentRenderer :value="page" class="prose-ease" />
       </div>

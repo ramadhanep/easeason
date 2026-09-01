@@ -9,6 +9,7 @@
     "preview": "nuxt preview",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "typecheck": "nuxt prepare && nuxt typecheck",
     "test": "vitest run",
     "postinstall": "nuxt prepare"
   },
@@ -40,6 +41,7 @@
     "shadcn-nuxt": "^2.8.2",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.9.3",
-    "vitest": "^4.1.11"
+    "vitest": "^4.1.11",
+    "vue-tsc": "^3.3.11"
   }
 }

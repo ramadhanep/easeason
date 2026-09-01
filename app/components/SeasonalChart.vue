@@ -39,10 +39,11 @@ const props = withDefaults(
     isDark?: boolean
     symbol?: string
   }>(),
-  { yKey: 'pct', isDark: false, symbol: '' },
+  { yKey: 'pct', isDark: false, symbol: '', currentYear: undefined },
 )
 
-const chartRef = ref<VChart | null>(null)
+ 
+const chartRef = ref<InstanceType<typeof VChart> | null>(null)
 
 function exportPng() {
   const chart = chartRef.value

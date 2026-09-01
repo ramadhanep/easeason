@@ -126,7 +126,7 @@ export function computeSeasonal(symbol: string, rows: Row[], now = new Date()): 
   }
 
   const currentPoints = buildCurrentYearProfile(cvReturns, currentYear)
-  const lastClose = rows.length ? rows[rows.length - 1].adjclose : undefined
+  const lastClose = rows.length ? rows[rows.length - 1]!.adjclose : undefined
 
   return {
     meta: {
