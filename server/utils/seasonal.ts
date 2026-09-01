@@ -1,4 +1,5 @@
 import YahooFinance from 'yahoo-finance2'
+import { getStockName } from './stocks'
 import {
   getElectionCycleLabel,
   TRUMP_YEARS,
@@ -140,4 +141,20 @@ export function computeSeasonal(symbol: string, rows: Row[], now = new Date()): 
     profiles,
     currentYear: currentPoints.length ? { year: currentYear, points: currentPoints } : undefined,
   }
+}
+
+const CACHE_TTL_MS = 30 * 60 * 1000
+const CACHE = new Map<string, { t: number; response: SeasonalResponse }>()
+
+export async function getSeasonalData(symbol: string, now = new Date()): Promise<SeasonalResponse> {
+  const hit = CACHE.get(symbol)
+  if (hit && Date.now() - hit.t < CACHE_TTL_MS) return hit.response
+
+  const rows = await fetchHistoricalData(symbol)
+
+  const response = computeSeasonal(symbol, rows, now)
+  response.meta.name = getStockName(symbol) || symbol
+
+  if (response.profiles.length) CACHE.set(symbol, { t: Date.now(), response })
+  return response
 }
