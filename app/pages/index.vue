@@ -58,6 +58,8 @@ function selectSymbol(symbol: string) {
 
 const popular = ['SPY', 'QQQ', 'BTC-USD', 'NVDA', 'MSFT', 'AMZN', 'GOOGL', 'META', 'TSLA', 'AAPL', 'AVGO', 'ETH-USD']
 
+const accent = Object.values(BRAND_COLORS)[Math.floor(Math.random() * Object.keys(BRAND_COLORS).length)] ?? ''
+
 const nameFor = (symbol: string) => {
   for (const g of groupedSymbols.value) {
     const item = g.items.find((s) => s.symbol === symbol)
@@ -73,6 +75,7 @@ const nameFor = (symbol: string) => {
       <div class="fixed inset-x-0 top-3 z-40 flex justify-center px-4 pointer-events-none">
         <div
           class="w-full max-w-2xl pointer-events-auto rounded-[2rem] border border-white/10 dark:border-white/10 bg-white/40 dark:bg-white/[0.06] backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] overflow-hidden p-2 transition-all duration-300 ease-out"
+          :style="accent ? { backgroundColor: `${accent}22`, backgroundImage: `radial-gradient(120% 100% at 0% 0%, ${accent}3d 0%, transparent 50%), radial-gradient(120% 100% at 100% 100%, ${accent}29 0%, transparent 50%)` } : {}"
         >
         <div class="flex items-center gap-2">
           <div class="flex-1 min-w-0">

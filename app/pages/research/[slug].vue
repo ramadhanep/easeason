@@ -16,7 +16,7 @@ const meta = computed<Record<string, any>>(() => (page.value?.meta as any) ?? {}
 const symbolTag = computed(() => {
   const tags = (meta.value.tags ?? []) as string[]
   const symbolTags = tags.filter((t) => t in BRAND_COLORS)
-  return symbolTags.length ? symbolTags[symbolTags.length - 1] : ''
+  return symbolTags.length ? (symbolTags[symbolTags.length - 1] ?? '') : ''
 })
 const backSymbol = computed(() => symbolTag.value)
 const brand = computed(() => BRAND_COLORS[symbolTag.value])
