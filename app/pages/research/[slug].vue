@@ -6,11 +6,15 @@ const { data: page } = await useAsyncData(route.path, () =>
 
 const backPath = computed(() => {
   const from = (route.meta as any).from as string | undefined
-  if (from && from.startsWith('/explore')) return '/'
+  if (from && from.startsWith('/explore')) return from
   if (from === '/') return '/'
   return '/research'
 })
-const backLabel = computed(() => (backPath.value === '/' ? 'Home' : 'Research'))
+const backSymbol = computed(() => page.value?.meta?.tags?.[0] ?? '')
+const backLabel = computed(() => {
+  if (backPath.value.startsWith('/explore')) return `Explore ${backSymbol.value}`
+  return backPath.value === '/' ? 'Home' : 'Research'
+})
 
 useHead({
   title: page.value?.title ? `${page.value.title} | easeason` : 'easeason',
@@ -23,6 +27,9 @@ useHead({
       <AppHeader :to="backPath" :label="backLabel" />
 
       <div v-if="page">
+        <div v-if="page.meta?.publishedOn" class="text-sm text-muted-foreground mb-6">
+          {{ new Date(page.meta.publishedOn).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) }}
+        </div>
         <ContentRenderer :value="page" class="prose-ease" />
       </div>
       <div v-else class="py-16 text-center text-sm text-muted-foreground">

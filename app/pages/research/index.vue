@@ -9,9 +9,12 @@ import { ArrowRight } from '@lucide/vue'
 const { data: articles } = await useAsyncData('research-index', () =>
   queryCollection('research')
     .select('title', 'description', 'meta', 'path')
-    .order('path', 'ASC')
     .all()
-    .then((docs: any[]) => docs.map((d) => ({ ...d, symbol: d.meta?.tags?.[0] ?? d.title.split(' ')[0] }))),
+    .then((docs: any[]) =>
+      docs
+        .map((d) => ({ ...d, symbol: d.meta?.tags?.[0] ?? d.title.split(' ')[0] }))
+        .sort((a, b) => new Date(b.meta?.publishedOn).getTime() - new Date(a.meta?.publishedOn).getTime()),
+    ),
 )
 </script>
 
@@ -39,6 +42,7 @@ const { data: articles } = await useAsyncData('research-index', () =>
               <NuxtLink :to="a.path" class="hover:text-foreground/80">{{ a.title }}</NuxtLink>
             </h2>
             <p v-if="a.description" class="text-sm text-muted-foreground mb-4">{{ a.description }}</p>
+            <p v-if="a.meta?.publishedOn" class="text-xs text-muted-foreground/70 mb-4">{{ new Date(a.meta.publishedOn).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) }}</p>
             <NuxtLink
               :to="a.path"
               class="inline-flex items-center gap-1.5 text-sm font-medium hover:text-foreground/80"

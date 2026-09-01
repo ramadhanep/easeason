@@ -8,6 +8,8 @@ const THEMES: Record<string, { bg: string; text: string }> = {
   AAPL: { bg: '#1d1d1f', text: '#ffffff' },
   'BTC-USD': { bg: '#161616', text: '#f7931a' },
   AMZN: { bg: '#2a1a00', text: '#FF9900' },
+  SPY: { bg: '#0D2119', text: '#ffffff' },
+  QQQ: { bg: '#001061', text: '#ffffff' },
 }
 
 const theme = computed(() => THEMES[props.symbol] ?? { bg: '#14210a', text: '#76b900' })

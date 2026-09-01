@@ -113,6 +113,9 @@
   .prose-ease a {
     @apply text-primary underline underline-offset-4;
   }
+  .prose-ease img {
+    @apply rounded-2xl border border-border/60 my-6 w-full;
+  }
   .prose-ease ul {
     @apply list-disc pl-6 mb-4 space-y-1;
   }

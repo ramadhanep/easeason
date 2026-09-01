@@ -30,6 +30,18 @@ const fmt = (n: number | undefined): string => {
 
 const totalProfiles = computed(() => data.value?.profiles?.length ?? 0)
 
+const { data: relatedArticles } = await useAsyncData(`related-${symbol}`, () =>
+  queryCollection('research')
+    .select('title', 'description', 'meta', 'path')
+    .all()
+    .then((docs: any[]) =>
+      docs
+        .map((d) => ({ ...d, symbol: d.meta?.tags?.[0] ?? d.title.split(' ')[0] }))
+        .filter((a) => a.meta?.tags?.some((t: string) => t.toUpperCase() === symbol.value.toUpperCase()))
+        .sort((a, b) => new Date(b.meta?.publishedOn).getTime() - new Date(a.meta?.publishedOn).getTime()),
+    ),
+)
+
 const bg = computed(() => BRAND_COLORS[symbol.value])
 const fg = computed(() => {
   const color = bg.value
@@ -139,6 +151,29 @@ const fg = computed(() => {
                 {{ Math.min(...p.years) }}–{{ Math.max(...p.years) }}
               </span>
             </div>
+          </div>
+        </div>
+
+        <div v-if="relatedArticles.length" class="mt-10">
+          <h2 class="text-lg font-medium mb-4">Related research</h2>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <NuxtLink
+              v-for="a in relatedArticles"
+              :key="a.path"
+              :to="a.path"
+              class="group border rounded-xl overflow-hidden hover:bg-muted/40 transition-colors"
+            >
+              <div class="aspect-[16/8] border-b">
+                <ArticleThumbnail :symbol="a.symbol" />
+              </div>
+              <div class="p-4">
+                <h3 class="font-medium leading-snug group-hover:text-foreground/80">{{ a.title }}</h3>
+                <p v-if="a.description" class="mt-1 line-clamp-2 text-sm text-muted-foreground">{{ a.description }}</p>
+                <p v-if="a.meta?.publishedOn" class="mt-2 text-xs text-muted-foreground/70">
+                  {{ new Date(a.meta.publishedOn).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) }}
+                </p>
+              </div>
+            </NuxtLink>
           </div>
         </div>
 
