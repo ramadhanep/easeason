@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowLeft, Moon, Sun, Download, CloudOff, FileText } from '@lucide/vue'
+import { ArrowLeft, Download, CloudOff, FileText } from '@lucide/vue'
 import { profileDescription } from '#shared/seasonal'
 const route = useRoute()
 const symbol = computed(() => route.params.symbol as string)
@@ -13,8 +13,6 @@ const yKey = ref<'pct' | 'factor'>('pct')
 const chartRef = ref<{ exportPng: () => void } | null>(null)
 const colorMode = useColorMode()
 const isDark = computed(() => colorMode.value === 'dark')
-const mounted = ref(false)
-onMounted(() => { mounted.value = true })
 
 useHead({
   title: computed(() => {
@@ -42,23 +40,7 @@ const fg = computed(() => {
 <template>
   <div class="min-h-screen bg-background text-foreground">
     <div class="mx-auto max-w-5xl px-4 py-8">
-      <header class="mb-8 flex items-center justify-between">
-        <NuxtLink
-          to="/"
-          class="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-        >
-          <ArrowLeft class="size-4" /> Home
-        </NuxtLink>
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label="Toggle theme"
-          @click="colorMode.preference = isDark ? 'light' : 'dark'"
-        >
-          <Sun v-if="mounted && isDark" class="size-4" />
-          <Moon v-else class="size-4" />
-        </Button>
-      </header>
+      <AppHeader to="/" label="Home" :brand="bg" />
 
       <div v-if="pending" class="space-y-4">
         <Skeleton class="h-8 w-48" />

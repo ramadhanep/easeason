@@ -1,15 +1,8 @@
 <script setup lang="ts">
-import { ArrowLeft, Moon, Sun } from '@lucide/vue'
-
 const route = useRoute()
 const { data: page } = await useAsyncData(route.path, () =>
   queryCollection('research').path(route.path).first(),
 )
-
-const colorMode = useColorMode()
-const isDark = computed(() => colorMode.value === 'dark')
-const mounted = ref(false)
-onMounted(() => { mounted.value = true })
 
 const backPath = computed(() => {
   const from = (route.meta as any).from as string | undefined
@@ -27,20 +20,7 @@ useHead({
 <template>
   <div class="min-h-screen bg-background text-foreground">
     <div class="mx-auto max-w-3xl px-4 py-16">
-      <header class="mb-10 flex items-center justify-between">
-        <NuxtLink :to="backPath" class="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1.5 cursor-pointer">
-          <ArrowLeft class="size-4" /> {{ backLabel }}
-        </NuxtLink>
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label="Toggle theme"
-          @click="colorMode.preference = isDark ? 'light' : 'dark'"
-        >
-          <Sun v-if="mounted && isDark" class="size-4" />
-          <Moon v-else class="size-4" />
-        </Button>
-      </header>
+      <AppHeader :to="backPath" :label="backLabel" />
 
       <div v-if="page">
         <ContentRenderer :value="page" class="prose-ease" />

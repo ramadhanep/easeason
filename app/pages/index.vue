@@ -57,7 +57,7 @@ function selectSymbol(symbol: string) {
   router.push(`/explore/${symbol}`)
 }
 
-const popular = ['SPY', 'QQQ', 'NVDA', 'MSFT', 'AMZN', 'GOOGL', 'META', 'TSLA', 'AAPL', 'AVGO', 'BTC-USD', 'ETH-USD']
+const popular = ['SPY', 'QQQ', 'BTC-USD', 'NVDA', 'MSFT', 'AMZN', 'GOOGL', 'META', 'TSLA', 'AAPL', 'AVGO', 'ETH-USD']
 
 const nameFor = (symbol: string) => {
   for (const g of groupedSymbols.value) {
@@ -73,7 +73,7 @@ const nameFor = (symbol: string) => {
     <div class="mx-auto max-w-2xl px-4 py-8">
       <div
         class="rounded-[2rem] border border-white/10 dark:border-white/10 bg-white/40 dark:bg-white/[0.06] backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] overflow-hidden p-2 transition-all duration-300"
-        :class="floating ? 'fixed inset-x-4 top-0 z-40' : 'mb-8'"
+        :class="floating ? 'fixed inset-x-4 top-3 z-40' : 'mb-8'"
       >
         <div class="flex items-center gap-2">
           <div class="flex-1 min-w-0">

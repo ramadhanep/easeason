@@ -4,12 +4,7 @@ description: "Independent notes on market seasonality."
 ---
 
 <script setup lang="ts">
-import { ArrowLeft, ArrowRight, Moon, Sun } from '@lucide/vue'
-
-const colorMode = useColorMode()
-const isDark = computed(() => colorMode.value === 'dark')
-const mounted = ref(false)
-onMounted(() => { mounted.value = true })
+import { ArrowRight } from '@lucide/vue'
 
 const { data: articles } = await useAsyncData('research-index', () =>
   queryCollection('research')
@@ -23,23 +18,7 @@ const { data: articles } = await useAsyncData('research-index', () =>
 <template>
   <div class="min-h-screen bg-background text-foreground">
     <div class="mx-auto max-w-5xl px-4 py-16">
-      <header class="mb-12 flex items-center justify-between">
-        <NuxtLink
-          to="/"
-          class="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-        >
-          <ArrowLeft class="size-4" /> Home
-        </NuxtLink>
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label="Toggle theme"
-          @click="colorMode.preference = isDark ? 'light' : 'dark'"
-        >
-          <Sun v-if="mounted && isDark" class="size-4" />
-          <Moon v-else class="size-4" />
-        </Button>
-      </header>
+      <AppHeader to="/" label="Home" />
 
       <div class="flex items-center gap-2 mb-3">
         <h1 class="text-3xl font-semibold tracking-tight">Research</h1>
