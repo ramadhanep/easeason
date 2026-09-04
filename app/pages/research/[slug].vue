@@ -33,7 +33,7 @@ useHead({
 <template>
   <div class="min-h-screen bg-background text-foreground">
     <div class="mx-auto max-w-3xl px-4 py-16">
-      <AppHeader :to="backPath" :label="backLabel" :brand="brand" />
+      <AppHeader :to="backPath" :label="backLabel" :brand="brand" :symbol="backSymbol" />
 
       <div v-if="page">
         <div v-if="meta.publishedOn" class="text-sm text-muted-foreground mb-6">
