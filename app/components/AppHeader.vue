@@ -47,7 +47,7 @@ onMounted(() => { mounted.value = true })
           :to="to"
           class="inline-flex min-w-0 items-center gap-1.5 rounded-full bg-white/50 dark:bg-white/10 h-12 pl-3 pr-5 text-sm font-medium text-foreground/80 backdrop-blur-xl cursor-pointer"
         >
-          <img :src="logoUrl" @error="(event) => { event.target.src = '/aruna.png' }" :alt="brand ?? 'easeason'" class="size-8 rounded-full object-cover shrink-0">
+          <img :src="logoUrl" @error="(e) => {(e.target as HTMLImageElement).src = '/aruna.png'}" :alt="brand ?? 'easeason'" class="size-8 rounded-full object-cover shrink-0">
           <ArrowLeft class="size-5 shrink-0" />
           <span class="truncate">{{ label }}</span>
         </NuxtLink>
