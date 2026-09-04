@@ -11,8 +11,10 @@ It is a **research/visualization tool**, not a prediction engine, trading system
 - **Asset explorer** — curated assets grouped into Crypto, US Stocks, IDX Stocks, and Indices, with shareable routes like `/explore/NVDA` and `/explore/BTC-USD`.
 - **Seasonal profiles** — All Years, Election, Pre-Election, Mid-Term, Post-Election, Trump Years, and Current Year.
 - **Interactive chart** — hover tooltip across all visible series, legend toggles, Percentage / Growth Factor scale, responsive, dark/light theme.
+- **Statistics** — per-profile table showing average, median, std deviation, win rate, best, worst, and year-end returns.
+- **Animate** — play a progressive chart reveal from Jan 1 to Dec 31.
 - **PNG export** — download a clean chart suited for research use.
-- **Markdown export** — the `/explore/[symbol]` page explains every series (year range, member years, description) and has a `.md` button to download the full seasonal data table.
+- **Markdown export** — the `/explore/[symbol]/context` page provides a copy-ready markdown document including statistics, series descriptions, and the full seasonal data table.
 - **AI-ready URLs** — `GET /markdown/<symbol>` (e.g. `/markdown/NVDA`) returns a `text/markdown` document that an LLM/agent can scan directly to understand the seasonal numbers.
 - **Research** — a static-content section with long-form seasonality articles, served from Markdown via `@nuxt/content`.
 - **PWA** — installable as a Progressive Web App.

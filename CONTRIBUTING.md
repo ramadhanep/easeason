@@ -53,11 +53,11 @@ npm run build
 
 ### 4. Commit your changes
 
-Write a clear, concise commit message that describes what you changed and why.
+Write a clear, concise commit message using conventional-commit format (`feat:`, `fix:`, `chore:`, `test:`, etc.):
 
 ```bash
 git add .
-git commit -m "Fix: keep floating header on all screen sizes"
+git commit -m "feat: add statistics tab to explore page"
 ```
 
 ### 5. Push and open a Pull Request

@@ -219,13 +219,11 @@ NVIDIA Corporation
 
 $181.42
 
-[ Search another asset ]
-
 --------------------------------------------------
 
-Historical Seasonality
+[ Chart ] [ Statistics ] [ Animate ]     [.PNG] [Context]
 
-                         Percentage   [Export PNG]
+  [ Percentage ] [ Growth Factor ]
 
 [legend / profile toggles]
 
@@ -233,10 +231,18 @@ Historical Seasonality
 
 --------------------------------------------------
 
-Current Year
+Statistics (when Statistics tab active):
 
-2026 YTD
-+XX.X%
+| Profile | Avg % | Median % | Std Dev | Win Rate | Best | Worst | Year-end |
+|---|---|---|---|---|---|---|---|
+| All Years | 12.4% | 14.1% | 8.2 | 62% | 45.3% | -18.7% | 12.4% |
+
+--------------------------------------------------
+
+Animate (when Animate tab active):
+
+Chart line progressively reveals Jan 1 → Dec 31.
+Click again to stop and reset.
 
 --------------------------------------------------
 
@@ -445,15 +451,18 @@ Recommended structure:
 ```text
 server/
 ├── api/
-│   └── seasonal.get.ts
+│   ├── seasonal.get.ts
+│   └── symbols.get.ts
 │
-├── utils/
-│   ├── stocks-data.ts    # curated asset list
-│   ├── yahoo.ts
-│   └── seasonal.ts
+├── routes/
+│   └── markdown/
+│       └── [symbol].ts
 │
-└── config/
-    └── seasonal.ts
+└── utils/
+    ├── math.ts
+    ├── seasonal.ts
+    ├── stocks.ts
+    └── stocks-data.ts
 ```
 
 Do not create many abstractions.
@@ -518,25 +527,21 @@ Recommended:
 app/
 ├── pages/
 │   ├── index.vue
-│   ├── explore/
-│   │   └── [symbol].vue
-│   ├── research/
-│   │   ├── index.vue
-│   │   └── [slug].vue
-│   └── about.vue
+│   └── explore/
+│       ├── [symbol]/
+│       │   ├── index.vue
+│       │   └── context.vue
+│       └── research/
+│           ├── index.vue
+│           └── [slug].vue
 │
 ├── components/
-│   ├── AssetSearch.vue
-│   ├── AssetHeader.vue
-│   ├── SeasonalChart.vue
-│   ├── SeasonalLegend.vue
-│   ├── ChartControls.vue
-│   ├── SeasonalSummary.vue
-│   ├── LoadingState.vue
-│   └── EmptyState.vue
+│   ├── AppHeader.vue
+│   ├── ArticleThumbnail.vue
+│   └── SeasonalChart.vue
 │
-└── composables/
-    └── useSeasonal.ts
+└── utils/
+    └── brand.ts
 ```
 
 Use components where they improve readability.
@@ -681,7 +686,7 @@ This represents the starting point.
 
 ## Scale toggle
 
-Provide:
+The Chart view provides a sub-toggle:
 
 ```text
 Percentage
@@ -691,6 +696,29 @@ Growth Factor
 User-facing terminology should be simple.
 
 Avoid exposing implementation terminology such as `cumprod`.
+
+## Statistics tab
+
+A table showing per-profile statistics:
+
+- Average % return
+- Median % return
+- Standard deviation
+- Win rate (% of days with positive return)
+- Best (max % return)
+- Worst (min % return)
+- Year-end (final cumulative % return)
+
+Computed client-side from existing profile `points[]`.
+
+## Animate tab
+
+A progressive chart reveal from Jan 1 to Dec 31.
+
+- Click Animate to start — the chart line progressively appears.
+- Click again to stop and reset.
+- Uses ECharts `dataZoom` slider approach (window slides left to right).
+- Returns to Chart view automatically when animation completes.
 
 ---
 
@@ -941,12 +969,12 @@ Only add these after the profile model proves useful.
 
 Potential future features:
 
-- Date-range selection
+- ~~Date-range selection~~ — partially covered by Animate (progressive reveal).
 - Trading-day alignment
-- Median seasonality
+- ~~Median seasonality~~ — partially covered by Statistics tab.
 - Percentile bands
 - Min/max envelopes
-- Individual historical years
+- ~~Individual historical years~~ — already exists as profile overlays.
 - Download CSV
 - SVG export
 
@@ -1076,6 +1104,9 @@ easeason v1 is done when:
 - [ ] Legend toggles each series.
 - [ ] Tooltip works.
 - [ ] Percentage/Growth Factor toggle works.
+- [ ] Statistics tab works (avg, median, std dev, win rate, best, worst, year-end).
+- [ ] Animate tab works (progressive chart reveal).
+- [ ] Context page provides markdown export with statistics.
 - [ ] PNG export works.
 - [ ] Loading/error/empty states work.
 - [ ] Mobile layout is usable.
