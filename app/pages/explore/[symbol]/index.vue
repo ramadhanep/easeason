@@ -142,7 +142,7 @@ const fg = computed(() => {
 <template>
   <div class="min-h-screen bg-background text-foreground">
     <div class="mx-auto max-w-5xl px-4 py-8">
-      <AppHeader to="/" label="Home" :brand="bg" />
+      <AppHeader to="/" label="Home" :brand="bg" :symbol="symbol" />
 
       <div v-if="pending" class="space-y-4">
         <Skeleton class="h-8 w-48" />

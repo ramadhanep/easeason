@@ -1,4 +1,8 @@
 export const BRAND_COLORS: Record<string, string> = {
+  '^GSPC': '#444444',
+  '^IXIC': '#0092BC',
+  '^DJI': '#E80033',
+
   NVDA: '#76B900',
   MSFT: '#00A1F1',
   AMZN: '#FF9900',
@@ -7,6 +11,7 @@ export const BRAND_COLORS: Record<string, string> = {
   TSLA: '#CC0000',
   AAPL: '#A0A0A0',
   AVGO: '#CC092F',
+  SNDK: '#EE2E22',
 
   'BTC-USD': '#F7931A',
   'ETH-USD': '#8A92B2',
@@ -114,7 +119,6 @@ export const BRAND_COLORS: Record<string, string> = {
   VST: '#FFB81C',
 
   // Indonesia
-
   'BBCA.JK': '#00529C',
   'BBRI.JK': '#003B7A',
   'BMRI.JK': '#003B70',

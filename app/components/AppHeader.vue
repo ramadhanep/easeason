@@ -5,8 +5,22 @@ const props = withDefaults(defineProps<{
   to: string
   label: string
   brand?: string
+  symbol?: string
 }>(), { brand: undefined })
 
+const logoUrl = computed(() => {
+  if (!props.symbol) return '/aruna.png'
+  const symbol = props.symbol
+  if (symbol.endsWith('.JK')) {
+    const name = symbol.replace('.JK', '')
+    return `https://yjygsxwzkkjhvigedvdy.supabase.co/storage/v1/object/public/idx/${name}.png`
+  }
+  if (symbol.endsWith('-USD')) {
+    const name = symbol.replace('-USD', '').toLocaleLowerCase()
+    return `https://www.bybit.com/bycsi-root/assets/image/coins/light/${name}.svg`
+  }
+  return `https://yjygsxwzkkjhvigedvdy.supabase.co/storage/v1/object/public/us/${symbol}.svg`
+})
 const glass = computed(() => {
   if (!props.brand) return {}
   return {
@@ -33,7 +47,7 @@ onMounted(() => { mounted.value = true })
           :to="to"
           class="inline-flex min-w-0 items-center gap-1.5 rounded-full bg-white/50 dark:bg-white/10 h-12 pl-3 pr-5 text-sm font-medium text-foreground/80 backdrop-blur-xl cursor-pointer"
         >
-          <img src="/aruna.png" :alt="brand ?? 'easeason'" class="size-8 rounded-full object-cover shrink-0">
+          <img :src="logoUrl" @error="(event) => { event.target.src = '/aruna.png' }" :alt="brand ?? 'easeason'" class="size-8 rounded-full object-cover shrink-0">
           <ArrowLeft class="size-5 shrink-0" />
           <span class="truncate">{{ label }}</span>
         </NuxtLink>

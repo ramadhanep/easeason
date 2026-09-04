@@ -56,7 +56,7 @@ function selectSymbol(symbol: string) {
   router.push(`/explore/${symbol}`)
 }
 
-const popular = ['SPY', 'QQQ', 'BTC-USD', 'NVDA', 'MSFT', 'AMZN', 'GOOGL', 'META', 'TSLA', 'AAPL', 'AVGO', 'ETH-USD']
+const popular = ['^GSPC', '^IXIC', '^DJI', 'SPY', 'QQQ', 'BTC-USD', 'AAPL', 'NVDA', 'MSFT', 'AMZN', 'GOOGL', 'META', 'TSLA', 'AVGO', 'MU', 'SNDK', 'BBCA.JK', 'BMRI.JK', 'ETH-USD', 'SOL-USD', 'BNB-USD']
 
 const accent = Object.values(BRAND_COLORS)[Math.floor(Math.random() * Object.keys(BRAND_COLORS).length)] ?? ''
 
@@ -147,7 +147,7 @@ const nameFor = (symbol: string) => {
 
       <div class="text-center">
         <div class="flex items-center justify-center gap-3">
-          <img src="/aruna.png" alt="easeason" class="size-12 rounded-full object-cover">
+          <img src="/aruna.png" alt="easeason" class="size-10 rounded-full object-cover">
           <h2 class="text-3xl font-semibold tracking-tight">easeason</h2>
         </div>
         <p class="text-sm text-muted-foreground mt-2">
