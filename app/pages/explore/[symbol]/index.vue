@@ -10,9 +10,41 @@ const { data, pending, error } = await useFetch('/api/seasonal', {
 })
 
 const yKey = ref<'pct' | 'factor'>('pct')
-const chartRef = ref<{ exportPng: () => void } | null>(null)
+const view = ref<'chart' | 'stats' | 'animate'>('chart')
+const chartRef = ref<{ exportPng: () => void; setZoom: (end: number) => void; resetZoom: () => void } | null>(null)
 const colorMode = useColorMode()
 const isDark = computed(() => colorMode.value === 'dark')
+
+const animating = ref(false)
+let animTimer: ReturnType<typeof setInterval> | null = null
+
+function startAnimation() {
+  view.value = 'animate'
+  animating.value = true
+  chartRef.value?.resetZoom()
+  let day = 1
+  animTimer = setInterval(() => {
+    if (day >= 100) {
+      if (animTimer) clearInterval(animTimer)
+      animTimer = null
+      animating.value = false
+      return
+    }
+    chartRef.value?.setZoom(day)
+    day++
+  }, 35)
+}
+
+function stopAnimation() {
+  if (animTimer) clearInterval(animTimer)
+  animTimer = null
+  animating.value = false
+  chartRef.value?.resetZoom()
+}
+
+onBeforeUnmount(() => {
+  if (animTimer) clearInterval(animTimer)
+})
 
 useHead({
   title: computed(() => {
@@ -29,6 +61,33 @@ const fmt = (n: number | undefined): string => {
 }
 
 const totalProfiles = computed(() => data.value?.profiles?.length ?? 0)
+
+interface StatRow {
+  label: string
+  avg: number
+  median: number
+  std: number
+  winRate: number
+  best: number
+  worst: number
+  end: number
+}
+
+const stats = computed<StatRow[]>(() => {
+  const rows = data.value?.profiles ?? []
+  return rows.map((p) => {
+    const vals = p.points.map((pt) => pt.pct)
+    const n = vals.length
+    if (n === 0) return { label: p.label, avg: 0, median: 0, std: 0, winRate: 0, best: 0, worst: 0, end: 0 }
+    const avg = vals.reduce((a, b) => a + b, 0) / n
+    const sorted = [...vals].sort((a, b) => a - b)
+    const mid = Math.floor(n / 2)
+    const median = n % 2 ? sorted[mid]! : (sorted[mid - 1]! + sorted[mid]!) / 2
+    const std = Math.sqrt(vals.reduce((a, b) => a + (b - avg) ** 2, 0) / n)
+    const winRate = (vals.filter((v) => v > 0).length / n) * 100
+    return { label: p.label, avg, median, std, winRate, best: Math.max(...vals), worst: Math.min(...vals), end: vals[n - 1]! }
+  })
+})
 
 const { data: relatedArticles } = await useAsyncData(`related-${symbol.value}`, () =>
   queryCollection('research')
@@ -96,22 +155,31 @@ const fg = computed(() => {
           <div class="mb-3 flex items-center justify-between gap-3 flex-wrap px-1">
             <div class="inline-flex items-center gap-1 rounded-full bg-muted p-1">
               <button
-                :class="yKey === 'pct' ? 'shadow-sm' : 'text-muted-foreground'"
-                :style="yKey === 'pct' ? { backgroundColor: bg ?? 'var(--background)', color: fg } : {}"
+                :class="view !== 'chart' ? 'text-muted-foreground' : ''"
+                :style="view === 'chart' ? { backgroundColor: bg ?? 'var(--background)', color: fg } : {}"
                 class="rounded-full px-4 py-1.5 text-sm font-medium transition-colors cursor-pointer"
-                :aria-pressed="yKey === 'pct'"
-                @click="yKey = 'pct'"
+                :aria-pressed="view === 'chart'"
+                @click="view = 'chart'; stopAnimation(); chartRef?.resetZoom()"
               >
-                Percentage
+                Chart
               </button>
               <button
-                :class="yKey === 'factor' ? 'shadow-sm' : 'text-muted-foreground'"
-                :style="yKey === 'factor' ? { backgroundColor: bg ?? 'var(--background)', color: fg } : {}"
+                :class="view !== 'stats' ? 'text-muted-foreground' : ''"
+                :style="view === 'stats' ? { backgroundColor: bg ?? 'var(--background)', color: fg } : {}"
                 class="rounded-full px-4 py-1.5 text-sm font-medium transition-colors cursor-pointer"
-                :aria-pressed="yKey === 'factor'"
-                @click="yKey = 'factor'"
+                :aria-pressed="view === 'stats'"
+                @click="view = 'stats'; stopAnimation()"
               >
-                Growth Factor
+                Statistics
+              </button>
+              <button
+                :class="view !== 'animate' ? 'text-muted-foreground' : ''"
+                :style="view === 'animate' ? { backgroundColor: bg ?? 'var(--background)', color: fg } : {}"
+                class="rounded-full px-4 py-1.5 text-sm font-medium transition-colors cursor-pointer"
+                :aria-pressed="view === 'animate'"
+                @click="animating ? stopAnimation() : startAnimation()"
+              >
+                Animate
               </button>
             </div>
             <div class="flex items-center gap-2">
@@ -124,12 +192,75 @@ const fg = computed(() => {
             </div>
           </div>
 
+          <div v-if="view === 'chart'" class="mb-3 flex items-center justify-center">
+            <div class="inline-flex items-center gap-1 rounded-full bg-muted p-1">
+              <button
+                :class="yKey === 'pct' ? 'shadow-sm' : 'text-muted-foreground'"
+                :style="yKey === 'pct' ? { backgroundColor: bg ?? 'var(--background)', color: fg } : {}"
+                class="rounded-full px-4 py-1 text-xs font-medium transition-colors cursor-pointer"
+                :aria-pressed="yKey === 'pct'"
+                @click="yKey = 'pct'"
+              >
+                Percentage
+              </button>
+              <button
+                :class="yKey === 'factor' ? 'shadow-sm' : 'text-muted-foreground'"
+                :style="yKey === 'factor' ? { backgroundColor: bg ?? 'var(--background)', color: fg } : {}"
+                class="rounded-full px-4 py-1 text-xs font-medium transition-colors cursor-pointer"
+                :aria-pressed="yKey === 'factor'"
+                @click="yKey = 'factor'"
+              >
+                Growth Factor
+              </button>
+            </div>
+          </div>
+
           <ClientOnly>
-            <SeasonalChart ref="chartRef" :profiles="data.profiles" :current-year="data.currentYear" :y-key="yKey" :is-dark="isDark" :symbol="symbol" />
+            <SeasonalChart
+              v-show="view === 'chart' || view === 'animate'"
+              ref="chartRef"
+              :profiles="data.profiles"
+              :current-year="data.currentYear"
+              :y-key="yKey"
+              :is-dark="isDark"
+              :symbol="symbol"
+              class="h-[540px]"
+            />
             <template #fallback>
               <Skeleton class="h-[540px] w-full" />
             </template>
           </ClientOnly>
+
+          <div v-if="view === 'stats'" class="overflow-hidden rounded-2xl border border-border/40">
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm">
+                <thead>
+                  <tr class="text-xs text-muted-foreground border-b">
+                    <th class="px-4 py-2.5 text-left font-medium">Profile</th>
+                    <th class="px-4 py-2.5 text-right font-medium">Avg %</th>
+                    <th class="px-4 py-2.5 text-right font-medium">Median %</th>
+                    <th class="px-4 py-2.5 text-right font-medium">Std Dev</th>
+                    <th class="px-4 py-2.5 text-right font-medium">Win Rate</th>
+                    <th class="px-4 py-2.5 text-right font-medium">Best</th>
+                    <th class="px-4 py-2.5 text-right font-medium">Worst</th>
+                    <th class="px-4 py-2.5 text-right font-medium">Year-end</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="s in stats" :key="s.label" class="border-b last:border-0">
+                    <td class="px-4 py-2.5 font-medium">{{ s.label }}</td>
+                    <td class="px-4 py-2.5 text-right font-mono">{{ fmt(s.avg) }}</td>
+                    <td class="px-4 py-2.5 text-right font-mono">{{ fmt(s.median) }}</td>
+                    <td class="px-4 py-2.5 text-right font-mono">{{ fmt(s.std) }}</td>
+                    <td class="px-4 py-2.5 text-right font-mono">{{ s.winRate.toFixed(0) }}%</td>
+                    <td class="px-4 py-2.5 text-right font-mono text-emerald-600 dark:text-emerald-400">+{{ fmt(s.best) }}</td>
+                    <td class="px-4 py-2.5 text-right font-mono text-red-600 dark:text-red-400">{{ fmt(s.worst) }}</td>
+                    <td class="px-4 py-2.5 text-right font-mono">{{ fmt(s.end) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
 
         <p class="mt-3 text-xs text-muted-foreground text-right">

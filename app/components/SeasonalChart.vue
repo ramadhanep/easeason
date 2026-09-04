@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import VChart from 'vue-echarts'
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
@@ -42,8 +42,25 @@ const props = withDefaults(
   { yKey: 'pct', isDark: false, symbol: '', currentYear: undefined },
 )
 
- 
 const chartRef = ref<InstanceType<typeof VChart> | null>(null)
+
+onMounted(() => {
+  chartRef.value?.chart?.setOption({
+    dataZoom: [{ type: 'slider', xAxisIndex: 0, start: 0, end: 100, show: false, moveHandleSize: 0 }],
+  })
+})
+
+function setZoom(end: number) {
+  chartRef.value?.chart?.setOption({
+    dataZoom: [{ type: 'slider', xAxisIndex: 0, start: 0, end, show: false, moveHandleSize: 0 }],
+  })
+}
+
+function resetZoom() {
+  chartRef.value?.chart?.setOption({
+    dataZoom: [{ type: 'slider', xAxisIndex: 0, start: 0, end: 100, show: false, moveHandleSize: 0 }],
+  })
+}
 
 function exportPng() {
   const chart = chartRef.value
@@ -58,7 +75,7 @@ function exportPng() {
   link.click()
 }
 
-defineExpose({ exportPng })
+defineExpose({ exportPng, setZoom, resetZoom })
 
 const SERIES_COLORS: Record<string, string> = {
   'all-years': '#6b7280',
