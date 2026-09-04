@@ -120,7 +120,7 @@ export function computeSeasonal(symbol: string, rows: Row[], now = new Date()): 
   if (trumpReturns.length) {
     profiles.push({
       id: 'trump-years',
-      label: 'Trump Years',
+      label: 'Trump Presidency Years',
       years: TRUMP_YEARS.filter((y) => y < currentYear),
       points: buildHirschProfile(trumpReturns),
     })

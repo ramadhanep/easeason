@@ -146,7 +146,10 @@ const nameFor = (symbol: string) => {
       <div class="h-20" aria-hidden="true"/>
 
       <div class="text-center">
-        <h2 class="text-3xl font-semibold tracking-tight">easeason</h2>
+        <div class="flex items-center justify-center gap-3">
+          <img src="/aruna.png" alt="easeason" class="size-12 rounded-full object-cover">
+          <h2 class="text-3xl font-semibold tracking-tight">easeason</h2>
+        </div>
         <p class="text-sm text-muted-foreground mt-2">
           Research/visualization tool for exploring how assets have historically moved throughout the year, including U.S. presidential election-cycle patterns.
         </p>

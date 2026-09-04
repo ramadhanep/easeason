@@ -38,7 +38,7 @@ export default defineNuxtConfig({
   app: {
     head: {
       title: 'easeason',
-      link: [{ rel: 'icon', href: 'data:,' }, { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' }],
+      link: [{ rel: 'icon', href: '/favicon.ico' }, { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' }],
       meta: [
         { name: 'description', content: 'Research tool for exploring how assets move throughout the year, including U.S. presidential election-cycle patterns.' },
         { name: 'theme-color', content: '#0a0a0a' },

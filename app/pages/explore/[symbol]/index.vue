@@ -9,7 +9,7 @@ const { data, pending, error } = await useFetch('/api/seasonal', {
   watch: [symbol],
 })
 
-const yKey = ref<'pct' | 'factor'>('pct')
+const seasonTab = ref('all-years')
 const view = ref<'chart' | 'stats' | 'animate'>('chart')
 const chartRef = ref<{ exportPng: () => void; setZoom: (end: number) => void; resetZoom: () => void } | null>(null)
 const colorMode = useColorMode()
@@ -61,6 +61,36 @@ const fmt = (n: number | undefined): string => {
 }
 
 const totalProfiles = computed(() => data.value?.profiles?.length ?? 0)
+
+const SEASON_TABS: Array<{ id: string; label: string }> = [
+  { id: 'all-years', label: 'All Seasons' },
+  { id: 'pre-election', label: 'Pre-Election' },
+  { id: 'election', label: 'Election' },
+  { id: 'post-election', label: 'Post-Election' },
+  { id: 'mid-term', label: 'Mid-Term' },
+]
+
+const CYCLE_TAB_IDS: Record<number, string> = { 0: 'election', 1: 'post-election', 2: 'mid-term', 3: 'pre-election' }
+
+const seasonTabs = computed(() => {
+  const ids = new Set((data.value?.profiles ?? []).map((p) => p.id))
+  return SEASON_TABS.filter((t) => ids.has(t.id))
+})
+
+const trumpEnabled = ref(true)
+
+watch(
+  () => data.value?.meta.currentYear,
+  (year) => {
+    if (year && CYCLE_TAB_IDS[year % 4]) {
+      const tabId = CYCLE_TAB_IDS[year % 4]!
+      if (data.value?.profiles.some((p) => p.id === tabId)) {
+        if (seasonTab.value === 'all-years') seasonTab.value = tabId
+      }
+    }
+  },
+  { immediate: true },
+)
 
 interface StatRow {
   label: string
@@ -192,27 +222,30 @@ const fg = computed(() => {
             </div>
           </div>
 
-          <div v-if="view === 'chart'" class="mb-3 flex items-center justify-center">
-            <div class="inline-flex items-center gap-1 rounded-full bg-muted p-1">
+          <div v-if="view === 'chart'" class="mb-3 flex items-center gap-2 overflow-x-auto px-1">
+            <div class="inline-flex items-center gap-1 rounded-full bg-muted p-1 shrink-0">
               <button
-                :class="yKey === 'pct' ? 'shadow-sm' : 'text-muted-foreground'"
-                :style="yKey === 'pct' ? { backgroundColor: bg ?? 'var(--background)', color: fg } : {}"
-                class="rounded-full px-4 py-1 text-xs font-medium transition-colors cursor-pointer"
-                :aria-pressed="yKey === 'pct'"
-                @click="yKey = 'pct'"
+                v-for="t in seasonTabs"
+                :key="t.id"
+                :class="seasonTab !== t.id ? 'text-muted-foreground' : ''"
+                :style="seasonTab === t.id ? { backgroundColor: bg ?? 'var(--background)', color: fg } : {}"
+                class="rounded-full px-4 py-1 text-xs font-medium transition-colors cursor-pointer whitespace-nowrap"
+                :aria-pressed="seasonTab === t.id"
+                @click="seasonTab = t.id"
               >
-                Percentage
-              </button>
-              <button
-                :class="yKey === 'factor' ? 'shadow-sm' : 'text-muted-foreground'"
-                :style="yKey === 'factor' ? { backgroundColor: bg ?? 'var(--background)', color: fg } : {}"
-                class="rounded-full px-4 py-1 text-xs font-medium transition-colors cursor-pointer"
-                :aria-pressed="yKey === 'factor'"
-                @click="yKey = 'factor'"
-              >
-                Growth Factor
+                {{ t.label }}
               </button>
             </div>
+            <button
+              v-if="data.profiles.some(p => p.id === 'trump-years')"
+              :class="!trumpEnabled ? 'text-muted-foreground' : ''"
+              :style="trumpEnabled ? { backgroundColor: bg ?? 'var(--background)', color: fg } : {}"
+              class="rounded-full px-4 py-1 text-xs font-medium transition-colors cursor-pointer whitespace-nowrap shrink-0"
+              :aria-pressed="trumpEnabled"
+              @click="trumpEnabled = !trumpEnabled"
+            >
+              Trump Presidency Years
+            </button>
           </div>
 
           <ClientOnly>
@@ -221,7 +254,9 @@ const fg = computed(() => {
               ref="chartRef"
               :profiles="data.profiles"
               :current-year="data.currentYear"
-              :y-key="yKey"
+              :season-filter="seasonTab"
+              :trump-enabled="trumpEnabled"
+              :brand="bg"
               :is-dark="isDark"
               :symbol="symbol"
               class="h-[540px]"

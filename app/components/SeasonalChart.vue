@@ -19,6 +19,11 @@ interface SeasonalPoint {
   factor: number
 }
 
+export interface SeasonFilter {
+  id: string
+  label: string
+}
+
 interface SeasonalProfile {
   id: string
   label: string
@@ -35,11 +40,13 @@ const props = withDefaults(
   defineProps<{
     profiles: SeasonalProfile[]
     currentYear?: CurrentYear
-    yKey?: 'pct' | 'factor'
+    seasonFilter?: string
+    trumpEnabled?: boolean
+    brand?: string
     isDark?: boolean
     symbol?: string
   }>(),
-  { yKey: 'pct', isDark: false, symbol: '', currentYear: undefined },
+  { isDark: false, symbol: '', currentYear: undefined, seasonFilter: 'all-years', trumpEnabled: false, brand: undefined },
 )
 
 const chartRef = ref<InstanceType<typeof VChart> | null>(null)
@@ -81,9 +88,82 @@ const SERIES_COLORS: Record<string, string> = {
   'all-years': '#6b7280',
   'election': '#3b82f6',
   'pre-election': '#10b981',
-  'mid-term': '#ef4444',
   'post-election': '#f59e0b',
-  'trump-years': '#8b5cf6',
+  'mid-term': '#0ea5e9',
+  'trump-years': '#ef4444',
+}
+
+function hexChannel(hex: string, shift: number) {
+  return (parseInt(hex.slice(1), 16) >> shift) & 255
+}
+
+function colorDist(a: string, b: string): number {
+  const dr = hexChannel(a, 16) - hexChannel(b, 16)
+  const dg = hexChannel(a, 8) - hexChannel(b, 8)
+  const db = hexChannel(a, 0) - hexChannel(b, 0)
+  return Math.sqrt(dr * dr + dg * dg + db * db)
+}
+
+const SEASON_IDS: Array<keyof typeof SERIES_COLORS> = ['pre-election', 'election', 'post-election', 'mid-term']
+
+const FALLBACK_COLORS = [
+  '#22c55e', '#06b6d4', '#f97316', '#84cc16', '#d946ef',
+  '#14b8a6', '#eab308', '#ec4899', '#a3e635', '#2dd4bf',
+  '#fb7185', '#38bdf8', '#a78bfa', '#4ade80', '#fbbf24',
+]
+
+function resolvedSeasonColors(brand?: string): Record<string, string> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const out: any = { ...SERIES_COLORS }
+  if (!brand || !brand.startsWith('#')) return out
+  const trumpColor = out['trump-years']
+  const taken = [trumpColor, brand]
+  const MIN_DIST = 110
+  for (const id of SEASON_IDS) {
+    const base = SERIES_COLORS[id]!
+    if (colorDist(base, brand) < MIN_DIST) {
+      const alt = FALLBACK_COLORS.find(
+        (c) => colorDist(c, brand) >= MIN_DIST && taken.every((t) => colorDist(c, t) >= MIN_DIST),
+      )
+      out[id] = alt ?? base
+      taken.push(out[id])
+    } else {
+      taken.push(base)
+    }
+  }
+  return out
+}
+
+function luminance(hex: string): number {
+  const r = hexChannel(hex, 16) / 255
+  const g = hexChannel(hex, 8) / 255
+  const b = hexChannel(hex, 0) / 255
+  return 0.299 * r + 0.587 * g + 0.114 * b
+}
+
+function visibleBrandColor(brand?: string, isDark?: boolean): string {
+  const fallback = isDark ? '#f9fafb' : '#111827'
+  if (!brand || !brand.startsWith('#')) return fallback
+  const lum = luminance(brand)
+  if (isDark) {
+    if (lum < 0.4) return blendToLuminance(brand, 0.65)
+  } else {
+    if (lum > 0.75) return blendToLuminance(brand, 0.4)
+  }
+  return brand
+}
+
+function blendToLuminance(hex: string, target: number): string {
+  const r = hexChannel(hex, 16)
+  const g = hexChannel(hex, 8)
+  const b = hexChannel(hex, 0)
+  const cur = luminance(hex)
+  if (Math.abs(cur - target) < 0.001) return hex
+  const k = (target - cur) / Math.max(cur, 0.0001)
+  const br = Math.max(0, Math.min(255, r + 255 * k))
+  const bg = Math.max(0, Math.min(255, g + 255 * k))
+  const bb = Math.max(0, Math.min(255, b + 255 * k))
+  return `#${((br << 16) | (bg << 8) | bb).toString(16).padStart(6, '0')}`
 }
 
 const monthLabel = (v: number) => {
@@ -101,28 +181,51 @@ const option = computed(() => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const allSeries: any[] = []
 
-  for (const profile of props.profiles) {
-    const color = SERIES_COLORS[profile.id] || '#6b7280'
+  const colors = resolvedSeasonColors(props.brand)
+
+  const filtered = props.seasonFilter !== 'all-years'
+    ? props.profiles.filter((p) => p.id === props.seasonFilter)
+    : props.profiles
+
+  for (const profile of filtered) {
+    const color = colors[profile.id] || '#6b7280'
     allSeries.push({
       name: profile.label,
       type: 'line',
       showSymbol: false,
       smooth: true,
-      data: profile.points.map((p) => [p.day, props.yKey === 'pct' ? p.pct : p.factor]),
+      data: profile.points.map((p) => [p.day, p.pct]),
       emphasis: { focus: 'series' },
       lineStyle: { width: 2, color },
       itemStyle: { color },
     })
   }
 
+  if (props.trumpEnabled) {
+    const trump = props.profiles.find((p) => p.id === 'trump-years')
+    if (trump) {
+      const color = colors['trump-years']
+      allSeries.push({
+        name: trump.label,
+        type: 'line',
+        showSymbol: false,
+        smooth: true,
+        data: trump.points.map((p) => [p.day, p.pct]),
+        emphasis: { focus: 'series' },
+        lineStyle: { width: 2, color },
+        itemStyle: { color },
+      })
+    }
+  }
+
   if (props.currentYear) {
-    const curColor = props.isDark ? '#f9fafb' : '#111827'
+    const curColor = visibleBrandColor(props.brand, props.isDark)
     allSeries.push({
       name: `${props.currentYear.year} YTD`,
       type: 'line',
       showSymbol: false,
       smooth: true,
-      data: props.currentYear.points.map((p) => [p.day, props.yKey === 'pct' ? p.pct : p.factor]),
+      data: props.currentYear.points.map((p) => [p.day, p.pct]),
       emphasis: { focus: 'series' },
       lineStyle: { width: 2.5, color: curColor, type: 'solid' },
       itemStyle: { color: curColor },
@@ -146,7 +249,7 @@ const option = computed(() => {
         let html = `<div style="font-weight:500;margin-bottom:4px">${dateStr}</div>`
         for (const p of params) {
           const val = p.data[1]
-          const formatted = props.yKey === 'pct' ? val.toFixed(2) + '%' : val.toFixed(3) + 'x'
+          const formatted = val.toFixed(2) + '%'
           html += `<div style="display:flex;justify-content:space-between;gap:12px"><span style="color:${p.color}">${p.seriesName}</span><span>${formatted}</span></div>`
         }
         return html
@@ -175,11 +278,11 @@ const option = computed(() => {
       splitLine: { show: false },
     },
     yAxis: {
-      type: props.yKey === 'pct' ? 'value' : 'log',
+      type: 'value',
       axisLabel: {
         color: textColor,
         fontSize: 11,
-        formatter: (v: number) => (props.yKey === 'pct' ? v + '%' : v + 'x'),
+        formatter: (v: number) => v + '%',
       },
       splitLine: { lineStyle: { color: gridColor } },
       axisLine: { show: true, lineStyle: { color: gridColor, width: 1 } },
