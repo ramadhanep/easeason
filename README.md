@@ -21,7 +21,7 @@ It is a **research/visualization tool**, not a prediction engine, trading system
 
 ## Tech Stack
 
-- [Nuxt 3](https://nuxt.com) + [TypeScript](https://www.typescriptlang.org)
+- [Nuxt 4](https://nuxt.com) + [TypeScript](https://www.typescriptlang.org)
 - [shadcn-vue](https://shadcn-vue.com) UI components + [Tailwind CSS](https://tailwindcss.com)
 - [ECharts](https://echarts.apache.org) via `vue-echarts`
 - [@lucide/vue](https://lucide.dev) icons

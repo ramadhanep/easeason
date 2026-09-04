@@ -32,7 +32,7 @@ Use a short, descriptive name, e.g. `fix-chart-tooltip` or `article-tsla-seasona
 
 ### 3. Make your changes
 
-- Write code that follows the existing style (TypeScript, Nuxt 3, Vue composition API).
+- Write code that follows the existing style (TypeScript, Nuxt 4, Vue composition API).
 - Run the dev server to sanity-check locally:
 
 ```bash
