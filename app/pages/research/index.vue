@@ -21,7 +21,7 @@ const { data: articles } = await useAsyncData('research-index', () =>
 
 <template>
   <div class="min-h-screen bg-background text-foreground">
-    <div class="mx-auto max-w-5xl px-4 py-16">
+    <div class="mx-auto max-w-2xl px-4 py-8">
       <AppHeader to="/" label="Home" />
 
       <div class="flex items-center gap-2 mb-3">

@@ -145,8 +145,8 @@ const nameFor = (symbol: string) => {
       </div>
       <div class="h-20" aria-hidden="true"/>
 
-      <div class="text-center">
-        <div class="flex items-center justify-center gap-3">
+      <div class="text-left">
+        <div class="flex items-start justify-start gap-3">
           <img src="/aruna.png" alt="easeason" class="size-10 rounded-full object-cover">
           <h2 class="text-3xl font-semibold tracking-tight">easeason</h2>
         </div>
@@ -158,7 +158,9 @@ const nameFor = (symbol: string) => {
       <div class="mt-10">
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-lg font-medium">Popular</h2>
-          <span class="text-xs text-muted-foreground">Tap to explore</span>
+          <NuxtLink to="/explore" class="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
+            View all <ArrowRight class="size-4" />
+          </NuxtLink>
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
           <button
