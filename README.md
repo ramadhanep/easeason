@@ -8,12 +8,13 @@ It is a **research/visualization tool**, not a prediction engine, trading system
 
 ## Features
 
-- **Asset explorer** — curated assets grouped into Crypto, US Stocks, IDX Stocks, and Indices, with shareable routes like `/explore/NVDA` and `/explore/BTC-USD`.
-- **Seasonal profiles** — All Years, Election, Pre-Election, Mid-Term, Post-Election, Trump Presidency Years, and Current Year.
-- **Interactive chart** — hover tooltip across all visible series, legend toggles, Percentage / Growth Factor scale, responsive, dark/light theme.
+- **Asset explorer** — curated assets grouped into Crypto, US Stocks, IDX Stocks, and Indices. Search from the homepage command palette (`⌘K`) or browse everything on `/explore`, with shareable routes like `/explore/NVDA` and `/explore/BTC-USD`.
+- **Seasonal profiles** — All Years, Election, Pre-Election, Mid-Term, Post-Election, Trump Presidency Years, and Current Year, selected via season tabs plus an independent Trump Presidency Years toggle.
+- **Interactive chart** — axis tooltip across all visible series, hover-driven overlay markers on the latest/hovered point, ECharts legend toggles, responsive, dark/light theme.
 - **Statistics** — per-profile table showing average, median, std deviation, win rate, best, worst, and year-end returns.
-- **Animate** — play a progressive chart reveal from Jan 1 to Dec 31.
+- **Animate** — play a progressive chart reveal from Jan 1 to Dec 31, with a 0.5x–4x speed control and play/pause.
 - **PNG export** — download a clean chart suited for research use.
+- **Dynamic back navigation** — the explore detail page's back button returns to `/explore` or `/` depending on where the visit came from.
 - **Markdown export** — the `/explore/[symbol]/context` page provides a copy-ready markdown document including statistics, series descriptions, and the full seasonal data table.
 - **AI-ready URLs** — `GET /markdown/<symbol>` (e.g. `/markdown/NVDA`) returns a `text/markdown` document that an LLM/agent can scan directly to understand the seasonal numbers.
 - **Research** — a static-content section with long-form seasonality articles, served from Markdown via `@nuxt/content`.
@@ -103,10 +104,10 @@ GET /markdown/<symbol>    # full seasonal data as text/markdown
 easeason/
 ├── app/
 │   ├── components/        # SeasonalChart + shadcn-vue ui/
-│   ├── pages/             # index, explore/[symbol], research/*
+│   ├── pages/             # index, explore/index (browse-all), explore/[symbol], research/*, [...slug] (404)
 │   ├── utils/             # brand colors (brand-colors.ts)
 │   ├── lib/               # cn() class merge
-│   ├── middleware/        # navigation tracking
+│   ├── middleware/        # navigation tracking (drives dynamic back button)
 │   └── assets/css/        # Tailwind + theme + prose styles
 ├── content/
 │   └── research/          # static Markdown articles

@@ -82,13 +82,13 @@ Support:
 ### Chart
 
 - Interactive line chart.
-- Toggle profiles on/off from legend.
+- Season tabs (All Seasons / Pre-Election / Election / Post-Election / Mid-Term) select which cycle profile is plotted; Trump Presidency Years is an independent toggle; legend items remain clickable to hide/show a series.
 - Hover tooltip.
 - Responsive.
-- Percentage view.
-- Growth Factor view.
+- Percentage view only (no separate Growth Factor scale — dropped to keep the chart controls simple).
 - Clean zero/reference line.
 - Clear current-year distinction.
+- Hover-driven overlay markers that follow the mouse (or the Animate playhead) across all visible series.
 - Export chart as PNG.
 - Chart should remain readable when several profiles are enabled.
 
@@ -223,7 +223,7 @@ $181.42
 
 [ Chart ] [ Statistics ] [ Animate ]     [.PNG] [Context]
 
-  [ Percentage ] [ Growth Factor ]
+  [ All Seasons ] [ Pre-Election ] [ Election ] [ Post-Election ] [ Mid-Term ]  [ Trump Presidency Years ]
 
 [legend / profile toggles]
 
@@ -527,21 +527,26 @@ Recommended:
 app/
 ├── pages/
 │   ├── index.vue
-│   └── explore/
-│       ├── [symbol]/
-│       │   ├── index.vue
-│       │   └── context.vue
-│       └── research/
-│           ├── index.vue
-│           └── [slug].vue
+│   ├── explore/
+│   │   ├── index.vue           # browse all assets by category
+│   │   └── [symbol]/
+│   │       ├── index.vue
+│   │       └── context.vue
+│   ├── research/
+│   │   ├── index.vue
+│   │   └── [slug].vue
+│   └── [...slug].vue           # catch-all 404
 │
 ├── components/
 │   ├── AppHeader.vue
 │   ├── ArticleThumbnail.vue
 │   └── SeasonalChart.vue
 │
+├── middleware/
+│   └── track-navigation.global.ts   # records `from` route for dynamic back button
+│
 └── utils/
-    └── brand.ts
+    └── brand-colors.ts
 ```
 
 Use components where they improve readability.
@@ -684,14 +689,16 @@ Clearly show:
 
 This represents the starting point.
 
-## Scale toggle
+## Season tabs and Trump toggle
 
-The Chart view provides a sub-toggle:
+Instead of a scale toggle, the Chart view exposes:
 
 ```text
-Percentage
-Growth Factor
+[ All Seasons | Pre-Election | Election | Post-Election | Mid-Term ]
+[ Trump Presidency Years ]
 ```
+
+The season tab selects a single cycle profile to plot (or all of them via "All Seasons"); the Trump toggle is independent and additive. Current Year is always plotted when available.
 
 User-facing terminology should be simple.
 
@@ -716,9 +723,9 @@ Computed client-side from existing profile `points[]`.
 A progressive chart reveal from Jan 1 to Dec 31.
 
 - Click Animate to start — the chart line progressively appears.
-- Click again to stop and reset.
+- Play/pause toggle, plus a 0.5x/1x/2x/4x speed control.
 - Uses ECharts `dataZoom` slider approach (window slides left to right).
-- Returns to Chart view automatically when animation completes.
+- Stays on the Animate view when paused; switching back to Chart resets the zoom.
 
 ---
 
@@ -1103,9 +1110,9 @@ easeason v1 is done when:
 - [ ] Current Year works.
 - [ ] Legend toggles each series.
 - [ ] Tooltip works.
-- [ ] Percentage/Growth Factor toggle works.
+- [ ] Season tabs and the Trump Presidency Years toggle work.
 - [ ] Statistics tab works (avg, median, std dev, win rate, best, worst, year-end).
-- [ ] Animate tab works (progressive chart reveal).
+- [ ] Animate tab works (progressive chart reveal, play/pause, speed control).
 - [ ] Context page provides markdown export with statistics.
 - [ ] PNG export works.
 - [ ] Loading/error/empty states work.
