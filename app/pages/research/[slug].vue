@@ -32,7 +32,7 @@ useHead({
 
 <template>
   <div class="min-h-screen bg-background text-foreground">
-    <div class="mx-auto max-w-3xl px-4 py-16">
+    <div class="mx-auto max-w-2xl px-4 py-8">
       <AppHeader :to="backPath" :label="backLabel" :brand="brand" :symbol="backSymbol" />
 
       <div v-if="page">

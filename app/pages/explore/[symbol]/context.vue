@@ -26,7 +26,7 @@ async function copyText() {
 
 <template>
   <div class="min-h-screen bg-background text-foreground">
-    <div class="mx-auto max-w-3xl px-4 py-8">
+    <div class="mx-auto max-w-5xl px-4 py-8">
       <AppHeader :to="`/explore/${symbol}`" :label="`Explore ${symbol}`" :brand="bg" :symbol="symbol" />
 
       <div class="flex items-center justify-between mb-4">
