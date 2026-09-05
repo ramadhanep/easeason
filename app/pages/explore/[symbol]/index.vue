@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowLeft, Download, CloudOff, FileText } from '@lucide/vue'
+import { ArrowLeft, Download, CloudOff, FileText, Play, Pause } from '@lucide/vue'
 import { profileDescription } from '#shared/seasonal'
 const route = useRoute()
 const symbol = computed(() => route.params.symbol as string)
@@ -16,30 +16,46 @@ const colorMode = useColorMode()
 const isDark = computed(() => colorMode.value === 'dark')
 
 const animating = ref(false)
+const activeDay = ref<number | null>(null)
 let animTimer: ReturnType<typeof setInterval> | null = null
 
-function startAnimation() {
-  view.value = 'animate'
+const SPEED_OPTIONS = [0.5, 1, 2, 4]
+const animSpeed = ref(1)
+
+function runFrom(startDay: number) {
   animating.value = true
-  chartRef.value?.resetZoom()
-  let day = 1
+  activeDay.value = startDay
+  chartRef.value?.setZoom((startDay / 365) * 100)
+  let day = startDay
   animTimer = setInterval(() => {
-    if (day >= 100) {
+    if (day >= 365) {
       if (animTimer) clearInterval(animTimer)
       animTimer = null
+      activeDay.value = 365
       animating.value = false
       return
     }
-    chartRef.value?.setZoom(day)
-    day++
-  }, 35)
+    day = Math.min(365, day + Math.round(2 * animSpeed.value))
+    activeDay.value = day
+    chartRef.value?.setZoom((day / 365) * 100)
+  }, 45)
+}
+
+function startAnimation() {
+  view.value = 'animate'
+  runFrom(1)
+}
+
+function playAnimation() {
+  view.value = 'animate'
+  const start = activeDay.value == null || activeDay.value >= 365 ? 1 : activeDay.value
+  runFrom(start)
 }
 
 function stopAnimation() {
   if (animTimer) clearInterval(animTimer)
   animTimer = null
   animating.value = false
-  chartRef.value?.resetZoom()
 }
 
 onBeforeUnmount(() => {
@@ -196,7 +212,7 @@ const backLabel = computed(() => (backTo.value === '/explore' ? 'Explore' : 'Hom
                 :style="view === 'chart' ? { backgroundColor: bg ?? 'var(--background)', color: fg } : {}"
                 class="rounded-full px-4 py-1.5 text-sm font-medium transition-colors cursor-pointer"
                 :aria-pressed="view === 'chart'"
-                @click="view = 'chart'; stopAnimation(); chartRef?.resetZoom()"
+                @click="view = 'chart'; stopAnimation(); activeDay = null; chartRef?.resetZoom()"
               >
                 Chart
               </button>
@@ -255,6 +271,30 @@ const backLabel = computed(() => (backTo.value === '/explore' ? 'Explore' : 'Hom
             </button>
           </div>
 
+          <div v-if="view === 'animate'" class="mb-3 flex items-center gap-2 px-1">
+            <div class="inline-flex items-center gap-1 rounded-full bg-muted p-1 shrink-0">
+              <button
+                v-for="s in SPEED_OPTIONS"
+                :key="s"
+                :class="animSpeed !== s ? 'text-muted-foreground' : ''"
+                :style="animSpeed === s ? { backgroundColor: bg ?? 'var(--background)', color: fg } : {}"
+                class="rounded-full px-4 py-1 text-xs font-medium transition-colors cursor-pointer whitespace-nowrap"
+                :aria-pressed="animSpeed === s"
+                @click="animSpeed = s"
+              >
+                {{ s }}x
+              </button>
+            </div>
+            <button
+              class="inline-flex items-center justify-center size-7 rounded-full bg-muted transition-colors cursor-pointer shrink-0"
+              :aria-label="animating ? 'Pause' : 'Play'"
+              @click="animating ? stopAnimation() : playAnimation()"
+            >
+              <Pause v-if="animating" class="size-3.5" />
+              <Play v-else class="size-3.5" />
+            </button>
+          </div>
+
           <ClientOnly>
             <SeasonalChart
               v-show="view === 'chart' || view === 'animate'"
@@ -266,6 +306,7 @@ const backLabel = computed(() => (backTo.value === '/explore' ? 'Explore' : 'Hom
               :brand="bg"
               :is-dark="isDark"
               :symbol="symbol"
+              :active-day="activeDay"
               class="h-[540px]"
             />
             <template #fallback>

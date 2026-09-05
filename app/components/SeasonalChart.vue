@@ -4,7 +4,7 @@ import VChart from 'vue-echarts'
 import { use } from 'echarts/core'
 import { monthLabel } from '#shared/seasonal'
 import { CanvasRenderer } from 'echarts/renderers'
-import { LineChart } from 'echarts/charts'
+import { LineChart, EffectScatterChart } from 'echarts/charts'
 import {
   GridComponent,
   TooltipComponent,
@@ -12,7 +12,7 @@ import {
   DataZoomComponent,
 } from 'echarts/components'
 
-use([CanvasRenderer, LineChart, GridComponent, TooltipComponent, LegendComponent, DataZoomComponent])
+use([CanvasRenderer, LineChart, EffectScatterChart, GridComponent, TooltipComponent, LegendComponent, DataZoomComponent])
 
 interface SeasonalPoint {
   day: number
@@ -46,15 +46,28 @@ const props = withDefaults(
     brand?: string
     isDark?: boolean
     symbol?: string
+    activeDay?: number | null
   }>(),
-  { isDark: false, symbol: '', currentYear: undefined, seasonFilter: 'all-years', trumpEnabled: false, brand: undefined },
+  { isDark: false, symbol: '', currentYear: undefined, seasonFilter: 'all-years', trumpEnabled: false, brand: undefined, activeDay: null },
 )
 
 const chartRef = ref<InstanceType<typeof VChart> | null>(null)
+const hoverDay = ref<number | null>(null)
+const DEFAULT_DAY = 365
+const effectiveDay = computed(() => props.activeDay ?? hoverDay.value ?? DEFAULT_DAY)
 
 onMounted(() => {
-  chartRef.value?.chart?.setOption({
+  const c = chartRef.value?.chart
+  c?.setOption({
     dataZoom: [{ type: 'slider', xAxisIndex: 0, start: 0, end: 100, show: false, moveHandleSize: 0 }],
+  })
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  c?.on('updateAxisPointer', (params: any) => {
+    const value = params.axesInfo?.[0]?.value
+    if (typeof value === 'number') queueMicrotask(() => { hoverDay.value = value })
+  })
+  c?.getZr().on('globalout', () => {
+    queueMicrotask(() => { hoverDay.value = null })
   })
 })
 
@@ -69,6 +82,21 @@ function resetZoom() {
     dataZoom: [{ type: 'slider', xAxisIndex: 0, start: 0, end: 100, show: false, moveHandleSize: 0 }],
   })
 }
+
+watch(
+  () => props.activeDay,
+  (day) => {
+    const c = chartRef.value?.chart
+    if (!c) return
+    if (day == null) {
+      c.dispatchAction({ type: 'hideTip' })
+      return
+    }
+    const x = c.convertToPixel({ xAxisIndex: 0 }, day)
+    if (x == null || Number.isNaN(x)) return
+    c.dispatchAction({ type: 'showTip', seriesIndex: 0, x })
+  },
+)
 
 function exportPng() {
   const chart = chartRef.value
@@ -199,6 +227,7 @@ const option = computed(() => {
       emphasis: { focus: 'series' },
       lineStyle: { width: 2, color },
       itemStyle: { color },
+      animationDurationUpdate: 0,
     })
   }
 
@@ -215,6 +244,7 @@ const option = computed(() => {
         emphasis: { focus: 'series' },
         lineStyle: { width: 2, color },
         itemStyle: { color },
+        animationDurationUpdate: 0,
       })
     }
   }
@@ -230,6 +260,50 @@ const option = computed(() => {
       emphasis: { focus: 'series' },
       lineStyle: { width: 2.5, color: curColor, type: 'solid' },
       itemStyle: { color: curColor },
+      animationDurationUpdate: 0,
+    })
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const overlaySeries: any[] = []
+  if (effectiveDay.value != null) {
+    const target = effectiveDay.value
+    allSeries.forEach((s) => {
+      const pts = s.data as Array<[number, number]>
+      const hit = pts.find((p) => p[0] === target) ?? [...pts].reverse().find((p) => p[0] <= target)
+      if (!hit) return
+      const color = s.itemStyle.color as string
+      overlaySeries.push({
+        name: s.name,
+        type: 'effectScatter',
+        symbol: 'circle',
+        symbolSize: 4,
+        rippleEffect: { brushType: 'stroke', scale: 6, period: 3 },
+        itemStyle: { color },
+        animationDurationUpdate: 0,
+        labelLayout: { moveOverlap: 'shiftY' },
+        tooltip: { show: false },
+        label: {
+          show: true,
+          position: 'left',
+          align: 'right',
+          verticalAlign: 'middle',
+          distance: 8,
+          color: props.isDark ? '#111827' : '#fff',
+          backgroundColor: color,
+          borderRadius: 4,
+          padding: [2, 6],
+          fontSize: 10,
+          fontWeight: 600,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          formatter: (params: any) => {
+            const val = params.value[1];
+            return (val >= 0 ? '+' : '') + val.toFixed(1) + '%';
+          },
+        },
+        zlevel: 1,
+        data: [{ name: s.name, value: [hit[0], hit[1]] }],
+      })
     })
   }
 
@@ -242,11 +316,12 @@ const option = computed(() => {
       textStyle: { color: textColor, fontSize: 12 },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       formatter: (params: any[]) => {
-        if (!params.length) return ''
-        const day = params[0].data[0]
+        const linePoints = params.filter((p) => Array.isArray(p.data))
+        if (!linePoints.length) return ''
+        const day = linePoints[0].data[0]
         const dateStr = monthLabel(day)
         let html = `<div style="font-weight:500;margin-bottom:4px">${dateStr}</div>`
-        for (const p of params) {
+        for (const p of linePoints) {
           const val = p.data[1]
           const formatted = val.toFixed(2) + '%'
           html += `<div style="display:flex;justify-content:space-between;gap:12px"><span style="color:${p.color}">${p.seriesName}</span><span>${formatted}</span></div>`
@@ -286,7 +361,7 @@ const option = computed(() => {
       splitLine: { lineStyle: { color: gridColor } },
       axisLine: { show: true, lineStyle: { color: gridColor, width: 1 } },
     },
-    series: allSeries,
+    series: [...allSeries, ...overlaySeries],
   }
 })
 </script>
