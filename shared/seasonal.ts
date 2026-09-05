@@ -26,6 +26,33 @@ export interface SeasonalData {
   currentYear?: { year: number; points: SeasonalPoint[] }
 }
 
+export interface ProfileStats {
+  label: string
+  avg: number
+  median: number
+  std: number
+  winRate: number
+  best: number
+  worst: number
+  end: number
+}
+
+export function computeStats(label: string, points: SeasonalPoint[]): ProfileStats {
+  const vals = points.map((pt) => pt.pct)
+  const n = vals.length
+  if (n === 0) return { label, avg: 0, median: 0, std: 0, winRate: 0, best: 0, worst: 0, end: 0 }
+  const avg = vals.reduce((a, b) => a + b, 0) / n
+  const sorted = [...vals].sort((a, b) => a - b)
+  const mid = Math.floor(n / 2)
+  const median = n % 2 ? sorted[mid]! : (sorted[mid - 1]! + sorted[mid]!) / 2
+  const std = Math.sqrt(vals.reduce((a, b) => a + (b - avg) ** 2, 0) / n)
+  const winRate = (vals.filter((v) => v > 0).length / n) * 100
+  const best = Math.max(...vals)
+  const worst = Math.min(...vals)
+  const end = vals[n - 1]!
+  return { label, avg, median, std, winRate, best, worst, end }
+}
+
 export const PROFILE_DESCRIPTION: Record<string, string> = {
   'all-years': 'Average seasonal path across every valid historical year.',
   'election': 'Average path across U.S. presidential election years (year % 4 == 0).',
@@ -40,7 +67,7 @@ export function profileDescription(id: string): string {
   return PROFILE_DESCRIPTION[id] ?? ''
 }
 
-function monthLabel(doy: number): string {
+export function monthLabel(doy: number): string {
   const d = new Date(Date.UTC(2020, 0, 0))
   d.setUTCDate(d.getUTCDate() + doy)
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })

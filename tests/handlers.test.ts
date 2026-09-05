@@ -41,6 +41,11 @@ describe('handlers', () => {
     await expect(seasonalHandler(seasonalCtx(''))).rejects.toMatchObject({ statusCode: 400 })
   })
 
+  it('throws 404 when symbol is not in the curated list', async () => {
+    chartMock.mockResolvedValue({ quotes: makeQuotes() })
+    await expect(seasonalHandler(seasonalCtx('?symbol=BOGUS'))).rejects.toMatchObject({ statusCode: 404 })
+  })
+
   it('throws 404 when no market data exists', async () => {
     chartMock.mockResolvedValue({ quotes: [] })
     await expect(seasonalHandler(seasonalCtx('?symbol=NVDA'))).rejects.toMatchObject({ statusCode: 404 })
@@ -60,6 +65,11 @@ describe('handlers', () => {
 
   it('markdown route throws 400 without symbol param', async () => {
     await expect(markdownHandler(markdownCtx(''))).rejects.toMatchObject({ statusCode: 400 })
+  })
+
+  it('markdown route throws 404 for unlisted symbol', async () => {
+    chartMock.mockResolvedValue({ quotes: makeQuotes() })
+    await expect(markdownHandler(markdownCtx('BOGUS'))).rejects.toMatchObject({ statusCode: 404 })
   })
 
   it('markdown route throws 404 for empty data', async () => {

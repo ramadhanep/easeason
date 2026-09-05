@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ArrowLeft, Moon, Sun } from '@lucide/vue'
+import { SUPABASE_BASE_URL } from '~/lib/config'
 
 const props = withDefaults(defineProps<{
   to: string
@@ -13,13 +14,13 @@ const logoUrl = computed(() => {
   const symbol = props.symbol
   if (symbol.endsWith('.JK')) {
     const name = symbol.replace('.JK', '')
-    return `https://yjygsxwzkkjhvigedvdy.supabase.co/storage/v1/object/public/idx/${name}.png`
+    return `${SUPABASE_BASE_URL}/idx/${name}.png`
   }
   if (symbol.endsWith('-USD')) {
     const name = symbol.replace('-USD', '').toLocaleLowerCase()
     return `https://www.bybit.com/bycsi-root/assets/image/coins/light/${name}.svg`
   }
-  return `https://yjygsxwzkkjhvigedvdy.supabase.co/storage/v1/object/public/us/${symbol}.svg`
+  return `${SUPABASE_BASE_URL}/us/${symbol}.svg`
 })
 const glass = computed(() => {
   if (!props.brand) return {}

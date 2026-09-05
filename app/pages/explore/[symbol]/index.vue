@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ArrowLeft, Download, CloudOff, FileText } from '@lucide/vue'
-import { profileDescription } from '#shared/seasonal'
+import { profileDescription, computeStats, type ProfileStats } from '#shared/seasonal'
 const route = useRoute()
 const symbol = computed(() => route.params.symbol as string)
 
@@ -68,6 +68,7 @@ const SEASON_TABS: Array<{ id: string; label: string }> = [
   { id: 'election', label: 'Election' },
   { id: 'post-election', label: 'Post-Election' },
   { id: 'mid-term', label: 'Mid-Term' },
+  { id: 'trump-years', label: 'Trump Presidency Years' },
 ]
 
 const CYCLE_TAB_IDS: Record<number, string> = { 0: 'election', 1: 'post-election', 2: 'mid-term', 3: 'pre-election' }
@@ -76,8 +77,6 @@ const seasonTabs = computed(() => {
   const ids = new Set((data.value?.profiles ?? []).map((p) => p.id))
   return SEASON_TABS.filter((t) => ids.has(t.id))
 })
-
-const trumpEnabled = ref(true)
 
 watch(
   () => data.value?.meta.currentYear,
@@ -92,31 +91,9 @@ watch(
   { immediate: true },
 )
 
-interface StatRow {
-  label: string
-  avg: number
-  median: number
-  std: number
-  winRate: number
-  best: number
-  worst: number
-  end: number
-}
-
-const stats = computed<StatRow[]>(() => {
+const stats = computed<ProfileStats[]>(() => {
   const rows = data.value?.profiles ?? []
-  return rows.map((p) => {
-    const vals = p.points.map((pt) => pt.pct)
-    const n = vals.length
-    if (n === 0) return { label: p.label, avg: 0, median: 0, std: 0, winRate: 0, best: 0, worst: 0, end: 0 }
-    const avg = vals.reduce((a, b) => a + b, 0) / n
-    const sorted = [...vals].sort((a, b) => a - b)
-    const mid = Math.floor(n / 2)
-    const median = n % 2 ? sorted[mid]! : (sorted[mid - 1]! + sorted[mid]!) / 2
-    const std = Math.sqrt(vals.reduce((a, b) => a + (b - avg) ** 2, 0) / n)
-    const winRate = (vals.filter((v) => v > 0).length / n) * 100
-    return { label: p.label, avg, median, std, winRate, best: Math.max(...vals), worst: Math.min(...vals), end: vals[n - 1]! }
-  })
+  return rows.map((p) => computeStats(p.label, p.points))
 })
 
 const { data: relatedArticles } = await useAsyncData(`related-${symbol.value}`, () =>
@@ -236,16 +213,6 @@ const fg = computed(() => {
                 {{ t.label }}
               </button>
             </div>
-            <button
-              v-if="data.profiles.some(p => p.id === 'trump-years')"
-              :class="!trumpEnabled ? 'text-muted-foreground' : ''"
-              :style="trumpEnabled ? { backgroundColor: bg ?? 'var(--background)', color: fg } : {}"
-              class="rounded-full px-4 py-1 text-xs font-medium transition-colors cursor-pointer whitespace-nowrap shrink-0"
-              :aria-pressed="trumpEnabled"
-              @click="trumpEnabled = !trumpEnabled"
-            >
-              Trump Presidency Years
-            </button>
           </div>
 
           <ClientOnly>
@@ -255,7 +222,6 @@ const fg = computed(() => {
               :profiles="data.profiles"
               :current-year="data.currentYear"
               :season-filter="seasonTab"
-              :trump-enabled="trumpEnabled"
               :brand="bg"
               :is-dark="isDark"
               :symbol="symbol"

@@ -25,3 +25,6 @@ logs
 
 # archived original repo
 archive
+
+# Local audit reports
+tech-debt-scan-report.md

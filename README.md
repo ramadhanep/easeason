@@ -104,7 +104,7 @@ easeason/
 ├── app/
 │   ├── components/        # SeasonalChart + shadcn-vue ui/
 │   ├── pages/             # index, explore/[symbol], research/*
-│   ├── utils/             # brand colors
+│   ├── utils/             # brand colors (brand-colors.ts)
 │   ├── lib/               # cn() class merge
 │   ├── middleware/        # navigation tracking
 │   └── assets/css/        # Tailwind + theme + prose styles

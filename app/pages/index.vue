@@ -56,7 +56,7 @@ function selectSymbol(symbol: string) {
   router.push(`/explore/${symbol}`)
 }
 
-const popular = ['^GSPC', '^IXIC', '^DJI', 'SPY', 'QQQ', 'BTC-USD', 'AAPL', 'NVDA', 'MSFT', 'AMZN', 'GOOGL', 'META', 'TSLA', 'AVGO', 'MU', 'SNDK', 'BBCA.JK', 'BMRI.JK', 'ETH-USD', 'SOL-USD', 'BNB-USD']
+const popular = ['^GSPC', '^IXIC', '^DJI', 'BTC-USD', 'AAPL', 'NVDA', 'MSFT', 'AMZN', 'GOOGL', 'META', 'TSLA', 'AVGO', 'MU', 'BBCA.JK', 'BMRI.JK', 'ETH-USD', 'SOL-USD', 'BNB-USD']
 
 const accent = Object.values(BRAND_COLORS)[Math.floor(Math.random() * Object.keys(BRAND_COLORS).length)] ?? ''
 

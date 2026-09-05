@@ -34,5 +34,31 @@ describe('api pipeline', () => {
     expect(res.profiles.length).toBeGreaterThan(0)
     expect(res.profiles[0]).toMatchObject({ id: 'all-years' })
     expect(res.meta.currentYear).toBe(2025)
+
+    const allYears = res.profiles[0]!
+    expect(allYears.points.length).toBeGreaterThan(0)
+    for (const pt of allYears.points) {
+      expect(pt).toEqual(
+        expect.objectContaining({
+          day: expect.any(Number),
+          pct: expect.any(Number),
+          factor: expect.any(Number),
+        }),
+      )
+      expect(pt.factor).toBeGreaterThan(0)
+      expect(pt.pct).toBeCloseTo((pt.factor - 1) * 100, 6)
+    }
+    expect(allYears.points[0]!.day).toBeLessThan(allYears.points.at(-1)!.day)
+  })
+
+  it('groups election-cycle and trump-years profiles', async () => {
+    const rows = await fetchHistoricalData('AAPL')
+    const res = computeSeasonal('AAPL', rows, new Date('2025-01-01'))
+    const ids = res.profiles.map((p) => p.id)
+    expect(ids).toContain('election')
+    expect(ids).toContain('pre-election')
+    expect(ids).toContain('mid-term')
+    expect(ids).toContain('post-election')
+    expect(ids).toContain('trump-years')
   })
 })

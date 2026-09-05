@@ -2,6 +2,7 @@
 import { computed, ref, onMounted } from 'vue'
 import VChart from 'vue-echarts'
 import { use } from 'echarts/core'
+import { monthLabel } from '#shared/seasonal'
 import { CanvasRenderer } from 'echarts/renderers'
 import { LineChart } from 'echarts/charts'
 import {
@@ -166,7 +167,7 @@ function blendToLuminance(hex: string, target: number): string {
   return `#${((br << 16) | (bg << 8) | bb).toString(16).padStart(6, '0')}`
 }
 
-const monthLabel = (v: number) => {
+const monthAxisLabel = (v: number) => {
   const d = new Date(Date.UTC(2020, 0, 0))
   d.setUTCDate(d.getUTCDate() + v)
   return d.toLocaleString('en-US', { month: 'short' })
@@ -243,9 +244,7 @@ const option = computed(() => {
       formatter: (params: any[]) => {
         if (!params.length) return ''
         const day = params[0].data[0]
-        const d = new Date(Date.UTC(2020, 0, 0))
-        d.setUTCDate(d.getUTCDate() + day)
-        const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+        const dateStr = monthLabel(day)
         let html = `<div style="font-weight:500;margin-bottom:4px">${dateStr}</div>`
         for (const p of params) {
           const val = p.data[1]
@@ -272,7 +271,7 @@ const option = computed(() => {
       type: 'value',
       min: 1,
       max: 365,
-      axisLabel: { color: textColor, fontSize: 11, formatter: monthLabel },
+      axisLabel: { color: textColor, fontSize: 11, formatter: monthAxisLabel },
       axisLine: { lineStyle: { color: gridColor } },
       axisTick: { show: false },
       splitLine: { show: false },

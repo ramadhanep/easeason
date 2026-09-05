@@ -145,8 +145,23 @@ export function computeSeasonal(symbol: string, rows: Row[], now = new Date()): 
 
 const CACHE_TTL_MS = 30 * 60 * 1000
 const CACHE = new Map<string, { t: number; response: SeasonalResponse }>()
+const MAX_CACHE_ENTRIES = 100
+
+function cleanupCache(): void {
+  const now = Date.now()
+  for (const [key, val] of CACHE) {
+    if (now - val.t >= CACHE_TTL_MS) CACHE.delete(key)
+  }
+  if (CACHE.size > MAX_CACHE_ENTRIES) {
+    const oldest = [...CACHE.entries()].sort((a, b) => a[1].t - b[1].t)
+    for (let i = 0; i < oldest.length - MAX_CACHE_ENTRIES / 2; i++) {
+      CACHE.delete(oldest[i][0])
+    }
+  }
+}
 
 export async function getSeasonalData(symbol: string, now = new Date()): Promise<SeasonalResponse> {
+  cleanupCache()
   const hit = CACHE.get(symbol)
   if (hit && Date.now() - hit.t < CACHE_TTL_MS) return hit.response
 
