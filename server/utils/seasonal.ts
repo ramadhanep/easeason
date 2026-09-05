@@ -154,8 +154,9 @@ function cleanupCache(): void {
   }
   if (CACHE.size > MAX_CACHE_ENTRIES) {
     const oldest = [...CACHE.entries()].sort((a, b) => a[1].t - b[1].t)
-    for (let i = 0; i < oldest.length - MAX_CACHE_ENTRIES / 2; i++) {
-      CACHE.delete(oldest[i][0])
+    const toDrop = Math.floor(oldest.length - MAX_CACHE_ENTRIES / 2)
+    for (const [key] of oldest.slice(0, toDrop)) {
+      CACHE.delete(key)
     }
   }
 }
