@@ -9,7 +9,7 @@ It is a **research/visualization tool**, not a prediction engine, trading system
 ## Features
 
 - **Asset explorer** — curated assets grouped into Crypto, US Stocks, IDX Stocks, and Indices, with shareable routes like `/explore/NVDA` and `/explore/BTC-USD`.
-- **Seasonal profiles** — All Years, Election, Pre-Election, Mid-Term, Post-Election, Trump Years, and Current Year.
+- **Seasonal profiles** — All Years, Election, Pre-Election, Mid-Term, Post-Election, Trump Presidency Years, and Current Year.
 - **Interactive chart** — hover tooltip across all visible series, legend toggles, Percentage / Growth Factor scale, responsive, dark/light theme.
 - **Statistics** — per-profile table showing average, median, std deviation, win rate, best, worst, and year-end returns.
 - **Animate** — play a progressive chart reveal from Jan 1 to Dec 31.
@@ -56,7 +56,7 @@ Daily historical OHLCV data is fetched server-side from Yahoo Finance. The seaso
 - **Cycle label:** `year % 4` → `0` = Election, `1` = Post-Election, `2` = Mid-Term, `3` = Pre-Election.
 - **Profile:** mean daily return per day-of-year, compounded via `factor = cumprod(1 + meanDailyReturn)`, then `pct = (factor - 1) * 100`.
 - **Current year:** direct cumulative return of the year's daily returns (never averaged against history).
-- **Trump Years:** a custom historical comparison period — `2016, 2017, 2018, 2019, 2024, 2025`.
+- **Trump Presidency Years:** a custom historical comparison period — `2016, 2017, 2018, 2019, 2024, 2025`.
 
 Period/cycle definitions live in one place: `server/utils/math.ts`.
 
@@ -104,12 +104,15 @@ easeason/
 ├── app/
 │   ├── components/        # SeasonalChart + shadcn-vue ui/
 │   ├── pages/             # index, explore/[symbol], research/*
-│   ├── utils/             # brand colors, formatters
+│   ├── utils/             # brand colors
+│   ├── lib/               # cn() class merge
+│   ├── middleware/        # navigation tracking
 │   └── assets/css/        # Tailwind + theme + prose styles
 ├── content/
 │   └── research/          # static Markdown articles
 ├── server/
 │   ├── api/               # /api/seasonal, /api/symbols
+│   ├── routes/            # /markdown/<symbol>
 │   └── utils/             # math, seasonal, stocks + curated asset list (stocks-data.ts)
 ├── shared/                # types + markdown builder shared with server/api
 ├── public/img/            # generated thumbnail charts

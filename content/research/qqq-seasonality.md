@@ -21,7 +21,7 @@ The "All Years" line shows the average cumulative path across all valid years. T
 - **Post-Election** — year % 4 == 1
 - **Mid-Term** — year % 4 == 2
 - **Pre-Election** — year % 4 == 3
-- **Trump Years** — the defined Trump-administration years (2016–2019, 2024–2025)
+- **Trump Presidency Years** — the defined Trump-administration years (2016–2019, 2024–2025)
 - **2026 YTD** — the direct cumulative return of the current year, so far
 
 Open the explorer page and toggle each profile to compare.
@@ -51,14 +51,14 @@ Open the explorer page and toggle each profile to compare.
 | Election | 2000 – 2024 | 2000, 2004, 2008, 2012, 2016, 2020, 2024 |
 | Post-Election | 2001 – 2025 | 2001, 2005, 2009, 2013, 2017, 2021, 2025 |
 | Mid-Term | 2002 – 2022 | 2002, 2006, 2010, 2014, 2018, 2022 |
-| Trump Years | 2016 – 2025 | 2016, 2017, 2018, 2019, 2024, 2025 |
+| Trump Presidency Years | 2016 – 2025 | 2016, 2017, 2018, 2019, 2024, 2025 |
 | 2026 YTD | 2026 | 2026 |
 
 ## Monthly checkpoints
 
 Cumulative % change from Jan 1, sampled at each month-end (the Dec row is day 364, one day short of year-end).
 
-| Month | All Years | Post-Election | Mid-Term | Pre-Election | Election | Trump Years | 2026 YTD |
+| Month | All Years | Post-Election | Mid-Term | Pre-Election | Election | Trump Presidency Years | 2026 YTD |
 |---|---|---|---|---|---|---|---|
 | Jan | 1.2% | 6.1% | -4.3% | 3.0% | -1.9% | 4.0% | — |
 | Feb | 0.1% | -1.8% | -7.1% | 6.4% | 1.3% | 6.8% | — |
@@ -77,7 +77,7 @@ Cumulative % change from Jan 1, sampled at each month-end (the Dec row is day 36
 
 - **Mid-Term years are QQQ's seasonal laggard by far**, spending most of the year down double digits and finishing near **-8.9%** cumulatively — the only profile that ends the year in the red.
 - **Pre-Election years are the strongest tailwind**, building through the year and finishing near **+55.8%** cumulative by year-end on average.
-- **Trump Years run very hot**, tracking near the top of the pack all year and closing around **+38.7%**.
+- **Trump Presidency Years run very hot**, tracking near the top of the pack all year and closing around **+38.7%**.
 - **2026 opened trailing** (QQQ sat near **-4.6%** at the end of March) before ripping higher into mid-year, reaching **+18.6%** cumulative by the end of June — the most recent confirmed 2026 data point.
 
 ## Caveats

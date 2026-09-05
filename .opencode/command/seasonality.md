@@ -41,7 +41,7 @@ Standard paragraph explaining the "All Years" line and election-cycle profiles. 
 - **Post-Election** — year % 4 == 1
 - **Mid-Term** — year % 4 == 2
 - **Pre-Election** — year % 4 == 3
-- **Trump Years** — the defined Trump-administration years (2016–2019, 2024–2025)
+- **Trump Presidency Years** — the defined Trump-administration years (2016–2019, 2024–2025)
 - **{CURRENT_YEAR} YTD** — the direct cumulative return of the current year, so far
 
 End with: "Open the explorer page and toggle each profile to compare."

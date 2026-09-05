@@ -16,7 +16,7 @@ describe('election cycle mapping', () => {
     expect(getElectionCycleLabel(2023)).toBe('Pre-Election')
   })
 
-  it('keeps trump years definition', () => {
+  it('keeps trump presidency years definition', () => {
     expect(TRUMP_YEARS).toEqual([2016, 2017, 2018, 2019, 2024, 2025])
   })
 })

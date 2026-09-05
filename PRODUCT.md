@@ -76,7 +76,7 @@ Support:
 - Pre-Election
 - Mid-Term
 - Post-Election
-- Trump Years
+- Trump Presidency Years
 - Current Year
 
 ### Chart
@@ -290,9 +290,9 @@ Do not change this behavior without explicitly validating it against the origina
 
 ---
 
-# 7. Trump Years
+# 7. Trump Presidency Years
 
-Trump Years are a custom historical comparison profile.
+Trump Presidency Years are a custom historical comparison profile.
 
 For the current research definition:
 
@@ -649,7 +649,7 @@ Example:
 ○ Pre-Election
 ○ Mid-Term
 ○ Post-Election
-○ Trump Years
+○ Trump Presidency Years
 ```
 
 Clicking a legend item toggles the corresponding series.
@@ -668,7 +668,7 @@ Sep 18
 All Years       +12.8%
 Election        +14.1%
 Mid-Term         +8.4%
-Trump Years     +16.2%
+Trump Presidency Years     +16.2%
 2026            +19.7%
 ```
 
@@ -777,7 +777,7 @@ Each article can contain:
 ---
 title: "NVDA Seasonality Through the Election Cycle"
 description: "..."
-date: "2026-08-31"
+publishedOn: 2026-08-31
 tags:
   - NVDA
   - election-cycle
@@ -1011,7 +1011,7 @@ Do not spend the whole night building infrastructure first.
 
 ### Step 2 — Asset data
 
-- `stocks.csv`
+- `stocks-data.ts`
 - Parse curated symbols
 - Build search/Command UI
 - Create `/explore/[symbol]`
@@ -1034,7 +1034,7 @@ Implement and test:
 - Pre-Election
 - Mid-Term
 - Post-Election
-- Trump Years
+- Trump Presidency Years
 - Current Year
 
 Validate at least a few known symbols against the original research implementation.
@@ -1099,7 +1099,7 @@ easeason v1 is done when:
 - [ ] Pre-Election works.
 - [ ] Mid-Term works.
 - [ ] Post-Election works.
-- [ ] Trump Years works.
+- [ ] Trump Presidency Years works.
 - [ ] Current Year works.
 - [ ] Legend toggles each series.
 - [ ] Tooltip works.
@@ -1268,7 +1268,7 @@ See the chart
 
         ↓
 
-Toggle Election / Mid-Term / Trump Years
+Toggle Election / Mid-Term / Trump Presidency Years
 
         ↓
 

@@ -21,7 +21,7 @@ The "All Years" line shows the average cumulative path across all valid years. T
 - **Post-Election** — year % 4 == 1
 - **Mid-Term** — year % 4 == 2
 - **Pre-Election** — year % 4 == 3
-- **Trump Years** — the defined Trump-administration years (2016–2019, 2024–2025)
+- **Trump Presidency Years** — the defined Trump-administration years (2016–2019, 2024–2025)
 - **2026 YTD** — the direct cumulative return of the current year, so far
 
 Open the explorer page and toggle each profile to compare.
@@ -51,14 +51,14 @@ Open the explorer page and toggle each profile to compare.
 | Election | 2000 – 2024 | 2000, 2004, 2008, 2012, 2016, 2020, 2024 |
 | Post-Election | 2001 – 2025 | 2001, 2005, 2009, 2013, 2017, 2021, 2025 |
 | Mid-Term | 1998 – 2022 | 1998, 2002, 2006, 2010, 2014, 2018, 2022 |
-| Trump Years | 2016 – 2025 | 2016, 2017, 2018, 2019, 2024, 2025 |
+| Trump Presidency Years | 2016 – 2025 | 2016, 2017, 2018, 2019, 2024, 2025 |
 | 2026 YTD | 2026 | 2026 |
 
 ## Monthly checkpoints
 
 Cumulative % change from Jan 1, sampled at each month-end (the December row is day 364, one day short of year-end).
 
-| Month | All Years | Pre-Election | Election | Post-Election | Mid-Term | Trump Years | 2026 YTD |
+| Month | All Years | Pre-Election | Election | Post-Election | Mid-Term | Trump Presidency Years | 2026 YTD |
 |---|---|---|---|---|---|---|---|
 | Jan | 5.4% | 10.0% | -9.3% | 16.7% | 4.3% | 11.4% | — |
 | Feb | 1.4% | 13.6% | -15.3% | 0.1% | 7.2% | 11.9% | — |
