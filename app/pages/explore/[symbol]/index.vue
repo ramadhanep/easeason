@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ArrowLeft, Download, CloudOff, FileText, Play, Pause } from '@lucide/vue'
-import { profileDescription } from '#shared/seasonal'
+import { computeStats, profileDescription, type ProfileStats } from '#shared/seasonal'
 const route = useRoute()
 const symbol = computed(() => route.params.symbol as string)
 
@@ -108,32 +108,9 @@ watch(
   { immediate: true },
 )
 
-interface StatRow {
-  label: string
-  avg: number
-  median: number
-  std: number
-  winRate: number
-  best: number
-  worst: number
-  end: number
-}
-
-const stats = computed<StatRow[]>(() => {
-  const rows = data.value?.profiles ?? []
-  return rows.map((p) => {
-    const vals = p.points.map((pt) => pt.pct)
-    const n = vals.length
-    if (n === 0) return { label: p.label, avg: 0, median: 0, std: 0, winRate: 0, best: 0, worst: 0, end: 0 }
-    const avg = vals.reduce((a, b) => a + b, 0) / n
-    const sorted = [...vals].sort((a, b) => a - b)
-    const mid = Math.floor(n / 2)
-    const median = n % 2 ? sorted[mid]! : (sorted[mid - 1]! + sorted[mid]!) / 2
-    const std = Math.sqrt(vals.reduce((a, b) => a + (b - avg) ** 2, 0) / n)
-    const winRate = (vals.filter((v) => v > 0).length / n) * 100
-    return { label: p.label, avg, median, std, winRate, best: Math.max(...vals), worst: Math.min(...vals), end: vals[n - 1]! }
-  })
-})
+const stats = computed<ProfileStats[]>(() =>
+  (data.value?.profiles ?? []).map((p) => computeStats(p.label, p.points)),
+)
 
 const { data: relatedArticles } = await useAsyncData(`related-${symbol.value}`, () =>
   queryCollection('research')
