@@ -10,6 +10,7 @@ const { data, pending, error } = await useFetch('/api/seasonal', {
 })
 
 const seasonTab = ref('all-years')
+const horizonDays = computed(() => seasonTab.value === 'full-seasons' ? 1461 : 365)
 const view = ref<'chart' | 'stats' | 'animate'>('chart')
 const chartRef = ref<{ exportPng: () => void; setZoom: (end: number) => void; resetZoom: () => void } | null>(null)
 const colorMode = useColorMode()
@@ -25,19 +26,19 @@ const animSpeed = ref(1)
 function runFrom(startDay: number) {
   animating.value = true
   activeDay.value = startDay
-  chartRef.value?.setZoom((startDay / 365) * 100)
+  chartRef.value?.setZoom((startDay / horizonDays.value) * 100)
   let day = startDay
   animTimer = setInterval(() => {
-    if (day >= 365) {
+    if (day >= horizonDays.value) {
       if (animTimer) clearInterval(animTimer)
       animTimer = null
-      activeDay.value = 365
+      activeDay.value = horizonDays.value
       animating.value = false
       return
     }
-    day = Math.min(365, day + Math.round(2 * animSpeed.value))
+    day = Math.min(horizonDays.value, day + Math.round(2 * animSpeed.value))
     activeDay.value = day
-    chartRef.value?.setZoom((day / 365) * 100)
+    chartRef.value?.setZoom((day / horizonDays.value) * 100)
   }, 45)
 }
 
@@ -48,7 +49,7 @@ function startAnimation() {
 
 function playAnimation() {
   view.value = 'animate'
-  const start = activeDay.value == null || activeDay.value >= 365 ? 1 : activeDay.value
+  const start = activeDay.value == null || activeDay.value >= horizonDays.value ? 1 : activeDay.value
   runFrom(start)
 }
 
@@ -80,6 +81,7 @@ const totalProfiles = computed(() => data.value?.profiles?.length ?? 0)
 
 const SEASON_TABS: Array<{ id: string; label: string }> = [
   { id: 'all-years', label: 'All Seasons' },
+  { id: 'full-seasons', label: 'Full Seasons' },
   { id: 'pre-election', label: 'Pre-Election' },
   { id: 'election', label: 'Election' },
   { id: 'post-election', label: 'Post-Election' },

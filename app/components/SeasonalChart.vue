@@ -53,7 +53,7 @@ const props = withDefaults(
 
 const chartRef = ref<InstanceType<typeof VChart> | null>(null)
 const hoverDay = ref<number | null>(null)
-const DEFAULT_DAY = 365
+const DEFAULT_DAY = 1461
 const effectiveDay = computed(() => props.activeDay ?? hoverDay.value ?? DEFAULT_DAY)
 
 onMounted(() => {
@@ -115,6 +115,7 @@ defineExpose({ exportPng, setZoom, resetZoom })
 
 const SERIES_COLORS: Record<string, string> = {
   'all-years': '#6b7280',
+  'full-seasons': '#8b5cf6',
   'election': '#3b82f6',
   'pre-election': '#10b981',
   'post-election': '#f59e0b',
@@ -201,6 +202,15 @@ const monthAxisLabel = (v: number) => {
   return d.toLocaleString('en-US', { month: 'short' })
 }
 
+const fullSeasonAxisLabel = (v: number) => {
+  const d = new Date(Date.UTC(2020, 0, 0))
+  d.setUTCDate(d.getUTCDate() + v)
+  const month = d.toLocaleString('en-US', { month: 'short' })
+  const year = Math.floor((v - 1) / 365)
+  const phase = ['Election', 'Post-Election', 'Mid-Term', 'Pre-Election'][year] ?? ''
+  return `${phase}\n${month}`
+}
+
 const option = computed(() => {
   const textColor = props.isDark ? '#e5e9f0' : '#374151'
   const gridColor = props.isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'
@@ -212,12 +222,14 @@ const option = computed(() => {
 
   const colors = resolvedSeasonColors(props.brand)
 
-  const filtered = props.seasonFilter !== 'all-years'
-    ? props.profiles.filter((p) => p.id === props.seasonFilter)
-    : props.profiles
+  const filtered = props.seasonFilter === 'all-years'
+    ? props.profiles.filter((p) => p.id !== 'full-seasons')
+    : props.profiles.filter((p) => p.id === props.seasonFilter)
 
   for (const profile of filtered) {
-    const color = colors[profile.id] || '#6b7280'
+    const color = props.seasonFilter === 'full-seasons'
+      ? visibleBrandColor(props.brand, props.isDark)
+      : colors[profile.id] || '#6b7280'
     allSeries.push({
       name: profile.label,
       type: 'line',
@@ -227,11 +239,35 @@ const option = computed(() => {
       emphasis: { focus: 'series' },
       lineStyle: { width: 2, color },
       itemStyle: { color },
+      z: 3,
       animationDurationUpdate: 0,
+      ...(props.seasonFilter === 'full-seasons' ? {
+        markArea: {
+          silent: true,
+          z: 1,
+          itemStyle: { opacity: props.isDark ? 0.28 : 0.16 },
+          label: {
+            show: true,
+            position: 'insideTop',
+            color: props.isDark ? '#f8fafc' : '#111827',
+            backgroundColor: props.isDark ? 'rgba(15,23,42,0.78)' : 'rgba(255,255,255,0.82)',
+            borderRadius: 4,
+            padding: [3, 6],
+            fontSize: 10,
+            fontWeight: 700,
+          },
+          data: [
+            [{ name: 'Election year', xAxis: 1, itemStyle: { color: '#3b82f6' } }, { xAxis: 365 }],
+            [{ name: 'Post-election year', xAxis: 366, itemStyle: { color: '#f59e0b' } }, { xAxis: 730 }],
+            [{ name: 'Mid-term year', xAxis: 731, itemStyle: { color: '#0ea5e9' } }, { xAxis: 1095 }],
+            [{ name: 'Pre-election year', xAxis: 1096, itemStyle: { color: '#10b981' } }, { xAxis: 1461 }],
+          ],
+        },
+      } : {}),
     })
   }
 
-  if (props.trumpEnabled) {
+  if (props.trumpEnabled && props.seasonFilter !== 'full-seasons') {
     const trump = props.profiles.find((p) => p.id === 'trump-years')
     if (trump) {
       const color = colors['trump-years']
@@ -249,7 +285,7 @@ const option = computed(() => {
     }
   }
 
-  if (props.currentYear) {
+  if (props.currentYear && props.seasonFilter !== 'full-seasons') {
     const curColor = visibleBrandColor(props.brand, props.isDark)
     allSeries.push({
       name: `${props.currentYear.year} YTD`,
@@ -345,8 +381,13 @@ const option = computed(() => {
     xAxis: {
       type: 'value',
       min: 1,
-      max: 365,
-      axisLabel: { color: textColor, fontSize: 11, formatter: monthAxisLabel },
+      max: props.seasonFilter === 'full-seasons' ? 1461 : 365,
+      axisLabel: {
+        color: textColor,
+        fontSize: 10,
+        lineHeight: 14,
+        formatter: props.seasonFilter === 'full-seasons' ? fullSeasonAxisLabel : monthAxisLabel,
+      },
       axisLine: { lineStyle: { color: gridColor } },
       axisTick: { show: false },
       splitLine: { show: false },

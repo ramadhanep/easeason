@@ -46,6 +46,37 @@ export function buildHirschProfile(returns: RetRow[]): Point[] {
   return out
 }
 
+export function buildFullSeasonProfile(returns: RetRow[]): Point[] {
+  const cycles = new Map<number, RetRow[]>()
+  for (const row of returns) {
+    const electionYear = row.year - (row.year % 4)
+    const cycle = cycles.get(electionYear) ?? []
+    cycle.push(row)
+    cycles.set(electionYear, cycle)
+  }
+
+  const daily = new Map<number, { sum: number; n: number }>()
+  for (const cycle of cycles.values()) {
+    const years = new Set(cycle.map((row) => row.year))
+    if (years.size !== 4) continue
+    for (const row of cycle) {
+      const day = Math.floor(((Date.UTC(row.year, 0, 1) + (row.doy - 1) * 86400000) - Date.UTC(row.year - (row.year % 4), 0, 1)) / 86400000)
+      const acc = daily.get(day) ?? { sum: 0, n: 0 }
+      acc.sum += row.ret
+      acc.n += 1
+      daily.set(day, acc)
+    }
+  }
+
+  let factor = 1
+  return [...daily.entries()]
+    .sort((a, b) => a[0] - b[0])
+    .map(([day, { sum, n }]) => {
+      factor *= 1 + sum / n
+      return { day: day + 1, pct: (factor - 1) * 100, factor }
+    })
+}
+
 export function buildCurrentYearProfile(returns: RetRow[], year: number): Point[] {
   const days = returns
     .filter((r) => r.year === year)

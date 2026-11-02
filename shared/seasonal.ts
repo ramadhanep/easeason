@@ -55,6 +55,7 @@ export function computeStats(label: string, points: SeasonalPoint[]): ProfileSta
 
 export const PROFILE_DESCRIPTION: Record<string, string> = {
   'all-years': 'Average seasonal path across every valid historical year.',
+  'full-seasons': 'Average four-year path from an election year through the following three seasons.',
   'election': 'Average path across U.S. presidential election years (year % 4 == 0).',
   'pre-election': 'Average path across years before a presidential election (year % 4 == 3).',
   'mid-term': 'Average path across mid-term years (year % 4 == 2).',

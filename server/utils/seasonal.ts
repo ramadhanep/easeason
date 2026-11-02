@@ -5,6 +5,7 @@ import {
   TRUMP_YEARS,
   calculateDailyReturns,
   buildHirschProfile,
+  buildFullSeasonProfile,
   buildCurrentYearProfile,
   type PriceRow,
   type Point,
@@ -92,12 +93,22 @@ export function computeSeasonal(symbol: string, rows: Row[], now = new Date()): 
   const profiles: SeasonalProfile[] = []
 
   if (histReturns.length) {
+    const years = [...new Set(histReturns.map((r) => r.year))].sort((a, b) => a - b)
     profiles.push({
       id: 'all-years',
       label: 'All Years',
-      years: [...new Set(histReturns.map((r) => r.year))].sort((a, b) => a - b),
+      years,
       points: buildHirschProfile(histReturns),
     })
+    const fullSeasonYears = years.filter((year) => year % 4 === 0 && years.includes(year + 3))
+    if (fullSeasonYears.length) {
+      profiles.push({
+        id: 'full-seasons',
+        label: 'Full Seasons',
+        years: fullSeasonYears.flatMap((year) => [year, year + 1, year + 2, year + 3]),
+        points: buildFullSeasonProfile(histReturns),
+      })
+    }
   }
 
   const cycleGroups = new Map<string, typeof histReturns>()
