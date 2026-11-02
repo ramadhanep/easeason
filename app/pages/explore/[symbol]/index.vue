@@ -200,11 +200,11 @@ const backLabel = computed(() => (backTo.value === '/explore' ? 'Explore' : 'Hom
               </button>
             </div>
             <div class="flex items-center gap-2">
-              <Button variant="outline" size="sm" class="gap-1.5 cursor-pointer rounded-full" @click="chartRef?.exportPng()">
-                <Download class="size-4" /> .PNG
+              <Button variant="outline" size="sm" class="gap-1.5 cursor-pointer rounded-full" aria-label="Download chart as PNG" @click="chartRef?.exportPng()">
+                <Download class="size-4" /> <span class="hidden sm:inline">.PNG</span>
               </Button>
-              <NuxtLink :to="`/explore/${symbol}/context`" class="inline-flex items-center gap-1.5 rounded-full border border-input bg-transparent px-3 py-1.5 text-sm shadow-xs hover:bg-accent hover:text-accent-foreground cursor-pointer">
-                <FileText class="size-4" /> Context
+              <NuxtLink :to="`/explore/${symbol}/context`" aria-label="Open context" class="inline-flex items-center gap-1.5 rounded-full border border-input bg-transparent px-3 py-1.5 text-sm shadow-xs hover:bg-accent hover:text-accent-foreground cursor-pointer">
+                <FileText class="size-4" /> <span class="hidden sm:inline">Context</span>
               </NuxtLink>
             </div>
           </div>
@@ -234,6 +234,10 @@ const backLabel = computed(() => (backTo.value === '/explore' ? 'Explore' : 'Hom
               Trump Presidency Years
             </button>
           </div>
+
+          <p v-if="view === 'chart'" class="mb-3 px-1 text-xs text-muted-foreground">
+            {{ profileDescription(seasonTab) }}
+          </p>
 
           <div v-if="view === 'animate'" class="mb-3 flex items-center gap-2 px-1">
             <div class="inline-flex items-center gap-1 rounded-full bg-muted p-1 shrink-0">

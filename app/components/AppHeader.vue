@@ -46,12 +46,15 @@ onMounted(() => { mounted.value = true })
       <div class="flex items-center justify-between gap-2">
         <NuxtLink
           :to="to"
-          class="inline-flex min-w-0 items-center gap-1.5 rounded-full bg-white/50 dark:bg-white/10 h-12 pl-3 pr-5 text-sm font-medium text-foreground/80 backdrop-blur-xl cursor-pointer"
+          class="inline-flex min-w-0 shrink items-center gap-1.5 rounded-full bg-white/50 dark:bg-white/10 h-12 pl-3 pr-5 text-sm font-medium text-foreground/80 backdrop-blur-xl cursor-pointer"
         >
           <img :src="logoUrl" @error="(e) => {(e.target as HTMLImageElement).src = '/aruna.png'}" :alt="brand ?? 'easeason'" class="size-8 rounded-full object-cover shrink-0">
           <ArrowLeft class="size-5 shrink-0" />
           <span class="truncate">{{ label }}</span>
         </NuxtLink>
+        <div class="ml-auto sm:ml-0 sm:flex-1 sm:min-w-0">
+          <SymbolSearch />
+        </div>
         <div class="flex items-center gap-1">
           <a
             href="https://github.com/ramadhanep/easeason"

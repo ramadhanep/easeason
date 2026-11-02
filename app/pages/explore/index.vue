@@ -1,20 +1,16 @@
 <script setup lang="ts">
-import { ArrowRight } from '@lucide/vue'
-
-const router = useRouter()
-
 useHead({ title: 'Explore | easeason' })
 
 const { data: groups } = await useFetch('/api/symbols')
 
-const groupedSymbols = computed(() => {
-  if (!groups.value) return []
-  return Object.values(groups.value)
-    .filter((g) => g.items.length)
-    .map((g) => ({ label: g.label, items: g.items }))
-})
+const groupedSymbols = computed(() =>
+  Object.values(groups.value ?? {}).filter((g) => g.items.length),
+)
 
-const brandFor = (symbol: string) => BRAND_COLORS[symbol] ?? ''
+const category = ref('all')
+const visible = computed(() =>
+  category.value === 'all' ? groupedSymbols.value : groupedSymbols.value.filter((g) => g.label === category.value),
+)
 </script>
 
 <template>
@@ -22,31 +18,31 @@ const brandFor = (symbol: string) => BRAND_COLORS[symbol] ?? ''
     <div class="mx-auto max-w-2xl px-4 py-8">
       <AppHeader to="/" label="Home" />
 
-      <div class="flex items-center gap-2 mb-3">
-        <h1 class="text-3xl font-semibold tracking-tight">Explore</h1>
-      </div>
-      <p class="text-muted-foreground mb-12">Browse all assets by category.</p>
+      <h1 class="text-3xl font-semibold tracking-tight mb-3">Explore</h1>
+      <p class="text-muted-foreground mb-6">Browse all assets by category.</p>
 
-      <section v-for="g in groupedSymbols" :key="g.label" class="mb-10">
+      <div class="sticky top-[4.75rem] z-30 -mx-4 mb-6 overflow-x-auto bg-background/80 px-4 py-2 backdrop-blur-xl">
+        <div class="flex w-max items-center gap-2">
+          <button
+            v-for="c in [{ label: 'all', title: 'All' }, ...groupedSymbols.map((g) => ({ label: g.label, title: g.label }))]"
+            :key="c.label"
+            class="cursor-pointer whitespace-nowrap rounded-full border px-4 py-1.5 text-sm font-medium transition-colors"
+            :class="category === c.label ? 'border-foreground bg-foreground text-background' : 'border-border text-muted-foreground hover:text-foreground'"
+            :aria-pressed="category === c.label"
+            @click="category = c.label"
+          >
+            {{ c.title }}
+          </button>
+        </div>
+      </div>
+
+      <section v-for="g in visible" :key="g.label" class="mb-10">
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-lg font-medium">{{ g.label }}</h2>
           <span class="text-xs text-muted-foreground">{{ g.items.length }} assets</span>
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          <button
-            v-for="s in g.items"
-            :key="s.symbol"
-            class="group flex flex-col justify-between rounded-2xl p-4 text-left hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer min-w-0"
-            :class="brandFor(s.symbol) ? '' : 'bg-muted text-foreground'"
-            :style="brandFor(s.symbol) ? { backgroundColor: brandFor(s.symbol), color: brandTextColor(brandFor(s.symbol)!), } : {}"
-            @click="router.push(`/explore/${s.symbol}`)"
-          >
-            <div class="flex items-center justify-between gap-2">
-              <span class="font-bold text-base truncate">{{ s.symbol }}</span>
-              <ArrowRight class="size-4 opacity-50 group-hover:opacity-100 transition-opacity shrink-0" />
-            </div>
-            <span class="mt-1 text-xs opacity-70 truncate">{{ s.name }}</span>
-          </button>
+          <AssetTile v-for="s in g.items" :key="s.symbol" :symbol="s.symbol" :name="s.name" />
         </div>
       </section>
     </div>

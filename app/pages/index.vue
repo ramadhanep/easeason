@@ -1,20 +1,10 @@
 <script setup lang="ts">
-import { Moon, Sun, Search, FileText, ArrowRight } from '@lucide/vue'
+import { Moon, Sun, FileText, ArrowRight } from '@lucide/vue'
 
-const router = useRouter()
 const colorMode = useColorMode()
 const isDark = computed(() => colorMode.value === 'dark')
 const mounted = ref(false)
-onMounted(() => {
-  mounted.value = true
-  const onKey = (e: KeyboardEvent) => {
-    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
-      e.preventDefault()
-      searchOpen.value = !searchOpen.value
-    }
-  }
-  window.addEventListener('keydown', onKey)
-})
+onMounted(() => { mounted.value = true })
 
 const { data: groups } = await useFetch('/api/symbols')
 
@@ -30,31 +20,7 @@ const { data: articles } = await useAsyncData('home-research', () =>
     ),
 )
 
-const searchOpen = ref(false)
-const searchQuery = ref('')
-
-const groupedSymbols = computed(() => {
-  if (!groups.value) return []
-  return Object.values(groups.value)
-    .filter((g) => g.items.length)
-    .map((g) => ({ label: g.label, items: g.items }))
-})
-
-const filtered = computed(() => {
-  const q = searchQuery.value.trim().toLowerCase()
-  return groupedSymbols.value.map((g) => ({
-    label: g.label,
-    items: q
-      ? g.items.filter((s) => s.symbol.toLowerCase().includes(q) || s.name.toLowerCase().includes(q))
-      : g.items,
-  })).filter((g) => g.items.length)
-})
-
-function selectSymbol(symbol: string) {
-  searchOpen.value = false
-  searchQuery.value = ''
-  router.push(`/explore/${symbol}`)
-}
+const groupedSymbols = computed(() => Object.values(groups.value ?? {}).filter((g) => g.items.length))
 
 const popular = ['^GSPC', '^IXIC', 'SPY', 'QQQ', 'BTC-USD', 'AAPL', 'NVDA', 'MSFT', 'AMZN', 'GOOGL', 'META', 'TSLA', 'AVGO', 'MU', 'SNDK', 'WMT', 'JPM', 'AMD', 'TSM', 'COIN', 'BBCA.JK', 'ETH-USD', 'SOL-USD', 'BNB-USD']
 
@@ -82,45 +48,7 @@ const nameFor = (symbol: string) => {
         >
         <div class="flex items-center gap-2">
           <div class="flex-1 min-w-0">
-            <Popover v-model:open="searchOpen">
-              <PopoverTrigger as-child>
-                <Button
-                  variant="ghost"
-                  role="combobox"
-                  aria-expanded="searchOpen"
-                  class="w-full h-12 justify-start gap-3 rounded-[1.5rem] bg-white/50 dark:bg-white/10 px-4 text-muted-foreground font-normal backdrop-blur-xl"
-                >
-                  <Search class="size-4 shrink-0" />
-                  <span class="truncate min-w-0">Search stocks, crypto, indices...</span>
-                  <span class="ml-auto shrink-0 hidden sm:inline-flex text-xs text-muted-foreground/60">⌘K</span>
-                </Button>
-              </PopoverTrigger>
-            <PopoverContent class="w-[calc(100vw-2rem)] sm:w-[32rem] p-0 rounded-[1.25rem] overflow-hidden backdrop-blur-2xl" align="start" :side-offset="10">
-              <Command v-model:search-term="searchQuery">
-                <CommandInput placeholder="Search stocks, crypto, indices..." />
-                <CommandList>
-                  <CommandEmpty>No assets found.</CommandEmpty>
-                  <template v-for="g in filtered" :key="g.label">
-                    <CommandGroup :heading="g.label">
-                      <CommandItem
-                        v-for="s in g.items"
-                        :key="s.symbol"
-                        :value="s.symbol"
-                        class="flex items-center justify-between gap-3"
-                        @select="selectSymbol(s.symbol)"
-                      >
-                        <span class="flex items-center gap-2">
-                          <span class="font-medium">{{ s.symbol }}</span>
-                          <span class="text-sm text-muted-foreground truncate">{{ s.name }}</span>
-                        </span>
-                        <ArrowRight class="size-4 text-muted-foreground/60" />
-                      </CommandItem>
-                    </CommandGroup>
-                  </template>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
+            <SymbolSearch />
         </div>
         <a
           href="https://github.com/ramadhanep/easeason"
@@ -166,19 +94,7 @@ const nameFor = (symbol: string) => {
           </NuxtLink>
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          <button
-            v-for="sym in popular"
-            :key="sym"
-            class="group flex flex-col justify-between rounded-2xl p-4 text-left hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer"
-            :style="{ backgroundColor: BRAND_COLORS[sym], color: brandTextColor(BRAND_COLORS[sym]!) }"
-            @click="router.push(`/explore/${sym}`)"
-          >
-            <div class="flex items-center justify-between">
-              <span class="font-bold text-base">{{ sym }}</span>
-              <ArrowRight class="size-4 opacity-50 group-hover:opacity-100 transition-opacity" />
-            </div>
-            <span class="mt-1 text-xs opacity-70 truncate">{{ nameFor(sym) }}</span>
-          </button>
+          <AssetTile v-for="sym in popular" :key="sym" :symbol="sym" :name="nameFor(sym)" />
         </div>
       </div>
 
