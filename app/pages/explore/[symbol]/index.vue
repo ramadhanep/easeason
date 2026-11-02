@@ -9,7 +9,7 @@ const { data, pending, error } = await useFetch('/api/seasonal', {
   watch: [symbol],
 })
 
-const seasonTab = ref('all-years')
+const seasonTab = ref(data.value?.profiles.some((p) => p.id === 'full-seasons') ? 'full-seasons' : 'all-years')
 const horizonDays = computed(() => seasonTab.value === 'full-seasons' ? 1461 : 365)
 const view = ref<'chart' | 'stats' | 'animate'>('chart')
 const chartRef = ref<{ exportPng: () => void; setZoom: (end: number) => void; resetZoom: () => void } | null>(null)
@@ -80,15 +80,13 @@ const fmt = (n: number | undefined): string => {
 const totalProfiles = computed(() => data.value?.profiles?.length ?? 0)
 
 const SEASON_TABS: Array<{ id: string; label: string }> = [
-  { id: 'all-years', label: 'All Seasons' },
   { id: 'full-seasons', label: 'Full Seasons' },
+  { id: 'all-years', label: 'All Seasons' },
   { id: 'pre-election', label: 'Pre-Election' },
   { id: 'election', label: 'Election' },
   { id: 'post-election', label: 'Post-Election' },
   { id: 'mid-term', label: 'Mid-Term' },
 ]
-
-const CYCLE_TAB_IDS: Record<number, string> = { 0: 'election', 1: 'post-election', 2: 'mid-term', 3: 'pre-election' }
 
 const seasonTabs = computed(() => {
   const ids = new Set((data.value?.profiles ?? []).map((p) => p.id))
@@ -96,19 +94,6 @@ const seasonTabs = computed(() => {
 })
 
 const trumpEnabled = ref(true)
-
-watch(
-  () => data.value?.meta.currentYear,
-  (year) => {
-    if (year && CYCLE_TAB_IDS[year % 4]) {
-      const tabId = CYCLE_TAB_IDS[year % 4]!
-      if (data.value?.profiles.some((p) => p.id === tabId)) {
-        if (seasonTab.value === 'all-years') seasonTab.value = tabId
-      }
-    }
-  },
-  { immediate: true },
-)
 
 const stats = computed<ProfileStats[]>(() =>
   (data.value?.profiles ?? []).map((p) => computeStats(p.label, p.points)),

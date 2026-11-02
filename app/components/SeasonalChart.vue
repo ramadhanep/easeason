@@ -10,9 +10,11 @@ import {
   TooltipComponent,
   LegendComponent,
   DataZoomComponent,
+  MarkAreaComponent,
+  MarkLineComponent,
 } from 'echarts/components'
 
-use([CanvasRenderer, LineChart, EffectScatterChart, GridComponent, TooltipComponent, LegendComponent, DataZoomComponent])
+use([CanvasRenderer, LineChart, EffectScatterChart, GridComponent, TooltipComponent, LegendComponent, DataZoomComponent, MarkAreaComponent, MarkLineComponent])
 
 interface SeasonalPoint {
   day: number
@@ -202,14 +204,13 @@ const monthAxisLabel = (v: number) => {
   return d.toLocaleString('en-US', { month: 'short' })
 }
 
-const fullSeasonAxisLabel = (v: number) => {
-  const d = new Date(Date.UTC(2020, 0, 0))
-  d.setUTCDate(d.getUTCDate() + v)
-  const month = d.toLocaleString('en-US', { month: 'short' })
-  const year = Math.floor((v - 1) / 365)
-  const phase = ['Election', 'Post-Election', 'Mid-Term', 'Pre-Election'][year] ?? ''
-  return `${phase}\n${month}`
-}
+const FULL_SEASON_PHASES = [
+  { name: 'Election', color: '#3b82f6', from: 1, to: 365 },
+  { name: 'Post-Election', color: '#f59e0b', from: 366, to: 730 },
+  { name: 'Mid-Term', color: '#0ea5e9', from: 731, to: 1095 },
+  { name: 'Pre-Election', color: '#10b981', from: 1096, to: 1461 },
+]
+const FULL_SEASON_LABEL_DAYS = FULL_SEASON_PHASES.map((p) => Math.round((p.from + p.to) / 2))
 
 const option = computed(() => {
   const textColor = props.isDark ? '#e5e9f0' : '#374151'
@@ -245,23 +246,18 @@ const option = computed(() => {
         markArea: {
           silent: true,
           z: 1,
-          itemStyle: { opacity: props.isDark ? 0.28 : 0.16 },
-          label: {
-            show: true,
-            position: 'insideTop',
-            color: props.isDark ? '#f8fafc' : '#111827',
-            backgroundColor: props.isDark ? 'rgba(15,23,42,0.78)' : 'rgba(255,255,255,0.82)',
-            borderRadius: 4,
-            padding: [3, 6],
-            fontSize: 10,
-            fontWeight: 700,
-          },
-          data: [
-            [{ name: 'Election year', xAxis: 1, itemStyle: { color: '#3b82f6' } }, { xAxis: 365 }],
-            [{ name: 'Post-election year', xAxis: 366, itemStyle: { color: '#f59e0b' } }, { xAxis: 730 }],
-            [{ name: 'Mid-term year', xAxis: 731, itemStyle: { color: '#0ea5e9' } }, { xAxis: 1095 }],
-            [{ name: 'Pre-election year', xAxis: 1096, itemStyle: { color: '#10b981' } }, { xAxis: 1461 }],
-          ],
+          itemStyle: { opacity: props.isDark ? 0.22 : 0.14 },
+          data: FULL_SEASON_PHASES.map((p) => [
+            { xAxis: p.from, itemStyle: { color: p.color } },
+            { xAxis: p.to },
+          ]),
+        },
+        markLine: {
+          silent: true,
+          symbol: 'none',
+          label: { show: false },
+          lineStyle: { type: 'dashed', color: gridColor, width: 1 },
+          data: [{ xAxis: 365.5 }, { xAxis: 730.5 }, { xAxis: 1095.5 }],
         },
       } : {}),
     })
@@ -382,12 +378,15 @@ const option = computed(() => {
       type: 'value',
       min: 1,
       max: props.seasonFilter === 'full-seasons' ? 1461 : 365,
-      axisLabel: {
-        color: textColor,
-        fontSize: 10,
-        lineHeight: 14,
-        formatter: props.seasonFilter === 'full-seasons' ? fullSeasonAxisLabel : monthAxisLabel,
-      },
+      axisLabel: props.seasonFilter === 'full-seasons'
+        ? {
+            color: textColor,
+            fontSize: 11,
+            fontWeight: 600,
+            customValues: FULL_SEASON_LABEL_DAYS,
+            formatter: (v: number) => FULL_SEASON_PHASES.find((p) => v >= p.from && v <= p.to)?.name ?? '',
+          }
+        : { color: textColor, fontSize: 10, lineHeight: 14, formatter: monthAxisLabel },
       axisLine: { lineStyle: { color: gridColor } },
       axisTick: { show: false },
       splitLine: { show: false },
