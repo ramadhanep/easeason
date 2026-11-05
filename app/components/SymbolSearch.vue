@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Search, ArrowRight } from '@lucide/vue'
 
-defineProps<{ placeholder?: string }>()
+const props = withDefaults(defineProps<{ placeholder?: string; variant?: 'compact' | 'hero' }>(), { placeholder: undefined, variant: 'compact' })
 
 const router = useRouter()
 const { data: groups } = await useFetch('/api/symbols')
@@ -38,21 +38,24 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 <template>
   <Popover v-model:open="open">
     <PopoverTrigger as-child>
-      <Button
-        variant="ghost"
+      <button
+        type="button"
         role="combobox"
         :aria-expanded="open"
         aria-label="Search assets"
-        class="size-12 sm:w-full justify-center sm:justify-start gap-3 rounded-full sm:rounded-[1.5rem] bg-white/50 dark:bg-white/10 sm:px-4 p-0 text-muted-foreground font-normal backdrop-blur-xl"
+        class="inline-flex cursor-pointer items-center gap-3 border border-border bg-muted/50 text-muted-foreground transition-colors hover:border-foreground/20 hover:bg-muted"
+        :class="props.variant === 'hero'
+          ? 'h-14 w-full rounded-2xl bg-card px-5 text-base shadow-sm'
+          : 'size-9 justify-center rounded-lg sm:w-56 sm:justify-start sm:px-3 text-sm'"
       >
-        <Search class="size-4 shrink-0" />
-        <span class="hidden sm:inline truncate min-w-0">{{ placeholder ?? 'Search stocks, crypto, indices...' }}</span>
-        <span class="ml-auto shrink-0 hidden sm:inline-flex text-xs text-muted-foreground/60">⌘K</span>
-      </Button>
+        <Search class="shrink-0" :class="props.variant === 'hero' ? 'size-5' : 'size-4'" />
+        <span class="min-w-0 truncate" :class="props.variant === 'hero' ? '' : 'hidden sm:inline'">{{ placeholder ?? 'Search stocks, crypto, indices…' }}</span>
+        <kbd class="ml-auto hidden shrink-0 rounded border border-border bg-background px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground sm:inline-flex">⌘K</kbd>
+      </button>
     </PopoverTrigger>
     <PopoverContent
-      class="w-[calc(100vw-2rem)] sm:w-[32rem] p-0 rounded-[1.25rem] overflow-hidden backdrop-blur-2xl"
-      align="start"
+      class="w-[calc(100vw-2rem)] sm:w-[32rem] p-0 rounded-xl overflow-hidden backdrop-blur-2xl"
+      align="end"
       :side-offset="10"
       :collision-padding="16"
     >

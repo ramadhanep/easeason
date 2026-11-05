@@ -26,36 +26,39 @@ async function copyText() {
 
 <template>
   <div class="min-h-dvh bg-background text-foreground">
-    <div class="mx-auto max-w-5xl px-4 py-8">
-      <AppHeader :to="`/explore/${symbol}`" :label="`Explore ${symbol}`" :brand="bg" :symbol="symbol" />
+    <AppHeader :to="`/explore/${symbol}`" :label="`${symbol} seasonality`" :brand="bg" :symbol="symbol" />
 
-      <div class="flex items-center justify-between mb-4">
-        <div>
-          <h1 class="text-2xl font-bold tracking-tight flex items-center gap-2">
-            {{ symbol }} <span class="text-muted-foreground text-base font-normal">Context</span>
-          </h1>
-          <p class="text-sm text-muted-foreground mt-1">
-            Clean markdown summary ready to paste into your AI tools.
-          </p>
+    <main class="mx-auto max-w-4xl px-4 pb-16 pt-10">
+      <div class="mb-6 flex items-start justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <SymbolLogo :symbol="symbol" class="size-11" />
+          <div>
+            <h1 class="text-2xl font-semibold tracking-tight">{{ symbol }} <span class="font-normal text-muted-foreground">Context</span></h1>
+            <p class="mt-1 text-sm text-muted-foreground">Clean markdown summary, ready to paste into your AI tools.</p>
+          </div>
         </div>
-        <Button variant="outline" size="sm" class="gap-1.5 cursor-pointer rounded-full" :disabled="!md" @click="copyText">
+        <button
+          type="button"
+          class="inline-flex h-9 shrink-0 cursor-pointer items-center gap-1.5 rounded-lg bg-foreground px-3.5 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-40"
+          :disabled="!md"
+          @click="copyText"
+        >
           <Check v-if="copied" class="size-4" />
           <Copy v-else class="size-4" />
           {{ copied ? 'Copied' : 'Copy' }}
-        </Button>
+        </button>
       </div>
 
       <div v-if="pending" class="space-y-3">
         <Skeleton class="h-6 w-48" />
-        <Skeleton class="h-4 w-96" />
-        <Skeleton class="h-[540px] w-full" />
+        <Skeleton class="h-[540px] w-full rounded-2xl" />
       </div>
 
       <div v-else-if="error" class="py-24 text-center text-sm text-muted-foreground">
         Could not load context for {{ symbol }}.
       </div>
 
-      <pre v-else-if="md" class="whitespace-pre-wrap break-words rounded-2xl border border-border/40 bg-background/40 backdrop-blur-xl p-5 text-sm leading-relaxed text-foreground/90 font-mono shadow-sm">{{ md }}</pre>
-    </div>
+      <pre v-else-if="md" class="surface overflow-x-auto whitespace-pre-wrap break-words p-5 font-mono text-[13px] leading-relaxed text-foreground/90">{{ md }}</pre>
+    </main>
   </div>
 </template>

@@ -57,6 +57,8 @@
 }
 
 @theme inline {
+  --font-sans: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -87,7 +89,11 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: 'tnum' 1, 'cv11' 1;
+  }
+  h1, h2, h3 {
+    text-wrap: balance;
   }
   html {
     -webkit-tap-highlight-color: transparent;
@@ -170,5 +176,16 @@
   }
   .prose-ease pre {
     @apply overflow-x-auto rounded-lg border bg-muted p-4 mb-4 text-sm;
+  }
+}
+
+@layer utilities {
+  .bg-dots {
+    background-image: radial-gradient(color-mix(in oklab, var(--foreground) 14%, transparent) 1px, transparent 1px);
+    background-size: 20px 20px;
+    mask-image: radial-gradient(ellipse 70% 80% at 50% 0%, #000 30%, transparent 75%);
+  }
+  .surface {
+    @apply rounded-2xl border border-border bg-card;
   }
 }

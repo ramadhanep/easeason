@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { FileText, ArrowRight } from '@lucide/vue'
+import { ArrowRight } from '@lucide/vue'
 
 const { data: groups } = await useFetch('/api/symbols')
 
@@ -19,10 +19,7 @@ const groupedSymbols = computed(() => Object.values(groups.value ?? {}).filter((
 
 const popular = ['^GSPC', '^IXIC', 'SPY', 'QQQ', 'BTC-USD', 'AAPL', 'NVDA', 'MSFT', 'AMZN', 'GOOGL', 'META', 'TSLA', 'AVGO', 'MU', 'SNDK', 'WMT', 'JPM', 'AMD', 'TSM', 'COIN', 'BBCA.JK', 'ETH-USD', 'SOL-USD', 'BNB-USD']
 
-const accent = ref<string>('')
-onMounted(() => {
-  accent.value = Object.values(BRAND_COLORS)[Math.floor(Math.random() * Object.keys(BRAND_COLORS).length)] ?? ''
-})
+const totalAssets = computed(() => groupedSymbols.value.reduce((n, g) => n + g.items.length, 0))
 
 const nameFor = (symbol: string) => {
   for (const g of groupedSymbols.value) {
@@ -34,65 +31,66 @@ const nameFor = (symbol: string) => {
 </script>
 
 <template>
-  <div class="min-h-dvh relative bg-background text-foreground">
-    <div class="mx-auto max-w-2xl px-4 py-8">
-      <AppHeader :brand="accent" />
+  <div class="min-h-dvh bg-background text-foreground">
+    <AppHeader />
 
-      <div class="text-left">
-        <div class="flex items-start justify-start gap-3">
-          <img src="/aruna.png" alt="easeason" class="size-10 rounded-full object-cover">
-          <h2 class="text-3xl font-semibold tracking-tight">easeason</h2>
-        </div>
-        <p class="text-sm text-muted-foreground mt-2">
-          Research/visualization tool for exploring how assets have historically moved throughout the year, including U.S. presidential election-cycle patterns.
-        </p>
-      </div>
-
-      <div class="mt-10">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-medium">Popular</h2>
-          <NuxtLink to="/explore" class="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
-            View all <ArrowRight class="size-4" />
-          </NuxtLink>
-        </div>
-        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          <AssetTile v-for="sym in popular" :key="sym" :symbol="sym" :name="nameFor(sym)" />
-        </div>
-      </div>
-
-      <section class="mt-14">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-medium">Latest research</h2>
-          <NuxtLink to="/research" class="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
-            View all <ArrowRight class="size-4" />
-          </NuxtLink>
-        </div>
-        <div class="grid gap-4 sm:grid-cols-2">
-          <NuxtLink
-            v-for="a in articles"
-            :key="a.path"
-            :to="a.path"
-            class="group border rounded-xl overflow-hidden hover:bg-muted/40 transition-colors"
-          >
-            <div class="aspect-[16/8] border-b">
-              <ArticleThumbnail :symbol="a.symbol" />
-            </div>
-            <div class="p-4">
-              <h3 class="font-medium leading-snug group-hover:text-foreground/80">{{ a.title }}</h3>
-              <p v-if="a.description" class="mt-1 line-clamp-2 text-sm text-muted-foreground">{{ a.description }}</p>
-              <p v-if="a.meta?.publishedOn" class="mt-2 text-xs text-muted-foreground/70">{{ new Date(a.meta.publishedOn).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) }}</p>
-            </div>
-          </NuxtLink>
+    <main>
+      <section class="relative overflow-hidden border-b border-border/70">
+        <div class="bg-dots pointer-events-none absolute inset-0" aria-hidden="true" />
+        <div class="relative mx-auto max-w-3xl px-4 pb-16 pt-16 text-center sm:pb-24 sm:pt-24">
+          <p class="mb-5 inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
+            <span class="size-1.5 rounded-full bg-emerald-500" /> Open-source seasonality research
+          </p>
+          <h1 class="text-4xl font-semibold leading-[1.05] tracking-tight sm:text-6xl">
+            See how markets move<br class="hidden sm:block"> through the year.
+          </h1>
+          <p class="mx-auto mt-5 max-w-xl text-base text-muted-foreground sm:text-lg">
+            Explore historical seasonality for stocks, crypto and indices, including U.S. presidential election-cycle patterns.
+          </p>
+          <div class="mx-auto mt-8 max-w-xl">
+            <SymbolSearch variant="hero" />
+          </div>
+          <p class="mt-4 text-xs text-muted-foreground">
+            {{ totalAssets }} assets · 4-year election cycles · Updated daily
+          </p>
         </div>
       </section>
 
-      <footer class="mt-14 text-center text-xs text-muted-foreground flex items-center justify-center gap-1">
-        <NuxtLink to="/research" class="inline-flex items-center gap-1 hover:text-foreground">
-          <FileText class="size-3.5" /> Research
-        </NuxtLink>
-        <span class="mx-2">·</span>
-        Historical statistics, not financial advice.
-      </footer>
-    </div>
+      <div class="mx-auto max-w-6xl space-y-16 px-4 py-14">
+        <section>
+          <div class="mb-5 flex items-end justify-between">
+            <div>
+              <h2 class="text-xl font-semibold tracking-tight">Popular</h2>
+              <p class="mt-1 text-sm text-muted-foreground">Most explored assets.</p>
+            </div>
+            <NuxtLink to="/explore" class="inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground">
+              View all <ArrowRight class="size-4" />
+            </NuxtLink>
+          </div>
+          <div class="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <AssetTile v-for="sym in popular" :key="sym" :symbol="sym" :name="nameFor(sym)" />
+          </div>
+        </section>
+
+        <section v-if="articles?.length">
+          <div class="mb-5 flex items-end justify-between">
+            <div>
+              <h2 class="text-xl font-semibold tracking-tight">Latest research</h2>
+              <p class="mt-1 text-sm text-muted-foreground">Independent notes on market seasonality.</p>
+            </div>
+            <NuxtLink to="/research" class="inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground">
+              View all <ArrowRight class="size-4" />
+            </NuxtLink>
+          </div>
+          <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <ArticleCard v-for="a in articles.slice(0, 6)" :key="a.path" :article="a" />
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="border-t border-border/70 py-8 text-center text-xs text-muted-foreground">
+      Historical statistics, not financial advice.
+    </footer>
   </div>
 </template>

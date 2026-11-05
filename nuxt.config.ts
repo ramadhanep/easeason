@@ -38,7 +38,13 @@ export default defineNuxtConfig({
   app: {
     head: {
       title: 'easeason',
-      link: [{ rel: 'icon', href: '/favicon.ico' }, { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' }],
+      link: [
+        { rel: 'icon', href: '/favicon.ico' },
+        { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' },
+        { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+        { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
+        { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap' },
+      ],
       meta: [
         { name: 'description', content: 'Research tool for exploring how assets move throughout the year, including U.S. presidential election-cycle patterns.' },
         { name: 'theme-color', content: '#0a0a0a' },

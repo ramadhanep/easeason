@@ -32,18 +32,17 @@ useHead({
 
 <template>
   <div class="min-h-dvh bg-background text-foreground">
-    <div class="mx-auto max-w-2xl px-4 py-8">
-      <AppHeader :to="backPath" :label="backLabel" :brand="brand" :symbol="backSymbol" />
-
-      <div v-if="page">
-        <div v-if="meta.publishedOn" class="text-sm text-muted-foreground mb-6">
+    <AppHeader :to="backPath" :label="backLabel" :brand="brand" :symbol="backSymbol" />
+    <main class="mx-auto max-w-3xl px-4 pb-20 pt-10">
+      <article v-if="page">
+        <p v-if="meta.publishedOn" class="mb-4 font-mono text-xs uppercase tracking-wider text-muted-foreground">
           {{ new Date(meta.publishedOn).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) }}
-        </div>
+        </p>
         <ContentRenderer :value="page" class="prose-ease" />
-      </div>
+      </article>
       <div v-else class="py-16 text-center text-sm text-muted-foreground">
         Article not found.
       </div>
-    </div>
+    </main>
   </div>
 </template>
