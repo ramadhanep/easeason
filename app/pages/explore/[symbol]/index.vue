@@ -209,7 +209,7 @@ const backLabel = computed(() => (backTo.value === '/explore' ? 'Explore' : 'Hom
             </div>
           </div>
 
-          <div v-if="view === 'chart'" class="mb-3 flex items-center gap-2 overflow-x-auto px-1 [mask-image:linear-gradient(to_right,black_calc(100%-2rem),transparent)] sm:[mask-image:none]">
+          <div v-if="view === 'chart'" class="mb-3 flex items-center gap-2 overflow-x-auto px-1">
             <div class="inline-flex items-center gap-1 rounded-full bg-muted p-1 shrink-0">
               <button
                 v-for="t in seasonTabs"
@@ -223,26 +223,21 @@ const backLabel = computed(() => (backTo.value === '/explore' ? 'Explore' : 'Hom
                 {{ t.label }}
               </button>
             </div>
-          </div>
-
-          <div v-if="view === 'chart'" class="mb-3 flex items-start justify-between gap-3 px-1">
-            <p class="text-xs text-muted-foreground">{{ profileDescription(seasonTab) }}</p>
             <button
-              v-if="seasonTab !== 'full-seasons' && data.profiles.some(p => p.id === 'trump-years')"
-              role="switch"
-              :aria-checked="trumpEnabled"
-              class="inline-flex shrink-0 cursor-pointer items-center gap-2 text-xs text-muted-foreground hover:text-foreground"
+              v-if="data.profiles.some(p => p.id === 'trump-years')"
+              :class="!trumpEnabled ? 'text-muted-foreground' : ''"
+              :style="trumpEnabled ? { backgroundColor: bg ?? 'var(--background)', color: fg } : {}"
+              class="rounded-full px-4 py-1 text-xs font-medium transition-colors cursor-pointer whitespace-nowrap shrink-0"
+              :aria-pressed="trumpEnabled"
               @click="trumpEnabled = !trumpEnabled"
             >
-              <span
-                class="relative h-4 w-7 rounded-full bg-muted transition-colors"
-                :style="trumpEnabled ? { backgroundColor: bg ?? 'var(--foreground)' } : {}"
-              >
-                <span class="absolute top-0.5 left-0.5 size-3 rounded-full bg-background shadow transition-transform" :class="trumpEnabled ? 'translate-x-3' : ''" />
-              </span>
-              Trump years
+              Trump Presidency Years
             </button>
           </div>
+
+          <p v-if="view === 'chart'" class="mb-3 px-1 text-xs text-muted-foreground">
+            {{ profileDescription(seasonTab) }}
+          </p>
 
           <div v-if="view === 'animate'" class="mb-3 flex items-center gap-2 px-1">
             <div class="inline-flex items-center gap-1 rounded-full bg-muted p-1 shrink-0">

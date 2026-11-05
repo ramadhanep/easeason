@@ -24,8 +24,6 @@ const groupedSymbols = computed(() => Object.values(groups.value ?? {}).filter((
 
 const popular = ['^GSPC', '^IXIC', 'SPY', 'QQQ', 'BTC-USD', 'AAPL', 'NVDA', 'MSFT', 'AMZN', 'GOOGL', 'META', 'TSLA', 'AVGO', 'MU', 'SNDK', 'WMT', 'JPM', 'AMD', 'TSM', 'COIN', 'BBCA.JK', 'ETH-USD', 'SOL-USD', 'BNB-USD']
 
-const { data: outlook } = useLazyFetch('/api/outlook', { query: { symbols: popular.join(',') }, server: false })
-
 const accent = ref<string>('')
 onMounted(() => {
   accent.value = Object.values(BRAND_COLORS)[Math.floor(Math.random() * Object.keys(BRAND_COLORS).length)] ?? ''
@@ -96,7 +94,7 @@ const nameFor = (symbol: string) => {
           </NuxtLink>
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          <AssetTile v-for="sym in popular" :key="sym" :symbol="sym" :name="nameFor(sym)" :outlook="outlook?.[sym]" />
+          <AssetTile v-for="sym in popular" :key="sym" :symbol="sym" :name="nameFor(sym)" />
         </div>
       </div>
 
