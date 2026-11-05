@@ -264,7 +264,7 @@ const option = computed(() => {
   const colors = resolvedSeasonColors(props.brand)
 
   const filtered = props.seasonFilter === 'all-years'
-    ? props.profiles.filter((p) => p.id !== 'full-seasons')
+    ? props.profiles.filter((p) => p.id !== 'full-seasons' && p.id !== 'trump-years') // trump-years added below via toggle
     : props.profiles.filter((p) => p.id === props.seasonFilter)
 
   for (const profile of filtered) {

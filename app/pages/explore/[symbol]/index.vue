@@ -104,7 +104,7 @@ const seasonTabs = computed(() => {
   return SEASON_TABS.filter((t) => ids.has(t.id))
 })
 
-const trumpEnabled = ref(true)
+const trumpEnabled = ref(false)
 
 const stats = computed<ProfileStats[]>(() =>
   (data.value?.profiles ?? []).map((p) => computeStats(p.label, p.points)),
