@@ -24,6 +24,7 @@ export interface SeasonalData {
   meta: SeasonalMeta
   profiles: SeasonalProfile[]
   currentYear?: { year: number; points: SeasonalPoint[] }
+  fullSeasonStart?: number
   latestSeasons?: Array<{ id: string; label: string; year: number; points: SeasonalPoint[] }>
 }
 
@@ -56,7 +57,7 @@ export function computeStats(label: string, points: SeasonalPoint[]): ProfileSta
 
 export const PROFILE_DESCRIPTION: Record<string, string> = {
   'all-years': 'Average seasonal path across every valid historical year.',
-  'full-seasons': 'Average four-year path from an election year through the following three seasons.',
+  'full-seasons': 'Average four-year path across the election cycle, ordered so the current year sits in the last season.',
   'election': 'Average path across U.S. presidential election years (year % 4 == 0).',
   'pre-election': 'Average path across years before a presidential election (year % 4 == 3).',
   'mid-term': 'Average path across mid-term years (year % 4 == 2).',

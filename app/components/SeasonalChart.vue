@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue'
 import VChart from 'vue-echarts'
+import { useElementSize } from '@vueuse/core'
+import { ArrowRight } from '@lucide/vue'
 import { use } from 'echarts/core'
 import { monthLabel } from '#shared/seasonal'
 import { CanvasRenderer } from 'echarts/renderers'
@@ -51,6 +53,7 @@ const props = withDefaults(
     profiles: SeasonalProfile[]
     currentYear?: CurrentYear
     latestSeasons?: LatestSeason[]
+    startPhase?: number
     seasonFilter?: string
     trumpEnabled?: boolean
     brand?: string
@@ -58,7 +61,7 @@ const props = withDefaults(
     symbol?: string
     activeDay?: number | null
   }>(),
-  { isDark: false, symbol: '', currentYear: undefined, latestSeasons: () => [], seasonFilter: 'all-years', trumpEnabled: false, brand: undefined, activeDay: null },
+  { isDark: false, symbol: '', currentYear: undefined, latestSeasons: () => [], startPhase: 0, seasonFilter: 'all-years', trumpEnabled: false, brand: undefined, activeDay: null },
 )
 
 const chartRef = ref<InstanceType<typeof VChart> | null>(null)
@@ -122,6 +125,30 @@ function exportPng() {
 }
 
 defineExpose({ exportPng, setZoom, resetZoom })
+
+const emit = defineEmits<{ viewDetail: [id: string] }>()
+const wrapRef = ref<HTMLElement | null>(null)
+const { width: wrapW, height: wrapH } = useElementSize(wrapRef)
+const hoverBox = ref<number | null>(null)
+const GRID = { left: 56, right: 20, top: 30, bottom: 90 }
+
+function onPointer(e: PointerEvent) {
+  if (!wrapRef.value) return
+  const plotW = wrapW.value - GRID.left - GRID.right
+  const day = 1 + ((e.clientX - wrapRef.value.getBoundingClientRect().left - GRID.left) / plotW) * 1460
+  hoverBox.value = BOX_BOUNDS.findIndex(([from, to]) => day >= from && day <= to)
+  if (hoverBox.value < 0) hoverBox.value = null
+}
+
+const detailBox = computed(() => {
+  const i = hoverBox.value
+  if (i == null || props.seasonFilter !== 'full-seasons' || props.activeDay != null) return null
+  const phase = fullSeasonPhases.value[i]!
+  if (!props.profiles.some((p) => p.id === phase.id)) return null
+  const plotW = wrapW.value - GRID.left - GRID.right
+  const x = (d: number) => GRID.left + ((d - 1) / 1460) * plotW
+  return { phase, left: x(phase.from), width: x(phase.to) - x(phase.from), top: GRID.top, height: wrapH.value - GRID.top - GRID.bottom }
+})
 
 const SERIES_COLORS: Record<string, string> = {
   'all-years': '#6b7280',
@@ -212,13 +239,18 @@ const monthAxisLabel = (v: number) => {
   return d.toLocaleString('en-US', { month: 'short' })
 }
 
-const FULL_SEASON_PHASES = [
-  { name: 'Election', color: '#3b82f6', from: 1, to: 365 },
-  { name: 'Post-Election', color: '#f59e0b', from: 366, to: 730 },
-  { name: 'Mid-Term', color: '#0ea5e9', from: 731, to: 1095 },
-  { name: 'Pre-Election', color: '#10b981', from: 1096, to: 1461 },
+const PHASE_META = [
+  { id: 'election', name: 'Election', color: '#3b82f6' },
+  { id: 'post-election', name: 'Post-Election', color: '#f59e0b' },
+  { id: 'mid-term', name: 'Mid-Term', color: '#0ea5e9' },
+  { id: 'pre-election', name: 'Pre-Election', color: '#10b981' },
 ]
-const FULL_SEASON_LABEL_DAYS = FULL_SEASON_PHASES.map((p) => Math.round((p.from + p.to) / 2))
+const BOX_BOUNDS = [[1, 365], [366, 730], [731, 1095], [1096, 1461]] as const
+// Boxes rotate with the year so the current year always sits in the third box.
+const fullSeasonPhases = computed(() =>
+  BOX_BOUNDS.map(([from, to], i) => ({ ...PHASE_META[(props.startPhase + i) % 4]!, from, to })),
+)
+const FULL_SEASON_LABEL_DAYS = BOX_BOUNDS.map(([from, to]) => Math.round((from + to) / 2))
 
 const option = computed(() => {
   const textColor = props.isDark ? '#e5e9f0' : '#374151'
@@ -255,7 +287,7 @@ const option = computed(() => {
           silent: true,
           z: 1,
           itemStyle: { opacity: props.isDark ? 0.22 : 0.14 },
-          data: FULL_SEASON_PHASES.map((p) => [
+          data: fullSeasonPhases.value.map((p) => [
             { xAxis: p.from, itemStyle: { color: p.color } },
             { xAxis: p.to },
           ]),
@@ -422,7 +454,7 @@ const option = computed(() => {
             fontSize: 11,
             fontWeight: 600,
             customValues: FULL_SEASON_LABEL_DAYS,
-            formatter: (v: number) => FULL_SEASON_PHASES.find((p) => v >= p.from && v <= p.to)?.name ?? '',
+            formatter: (v: number) => fullSeasonPhases.value.find((p) => v >= p.from && v <= p.to)?.name ?? '',
           }
         : { color: textColor, fontSize: 10, lineHeight: 14, formatter: monthAxisLabel },
       axisLine: { lineStyle: { color: gridColor } },
@@ -445,7 +477,13 @@ const option = computed(() => {
 </script>
 
 <template>
-  <div class="h-[540px] w-full">
+  <div
+    ref="wrapRef"
+    class="relative w-full"
+    @pointermove="onPointer"
+    @pointerdown="onPointer"
+    @mouseleave="hoverBox = null"
+  >
     <VChart
       ref="chartRef"
       :option="option"
@@ -454,5 +492,18 @@ const option = computed(() => {
       aria-label="Seasonal performance chart. Toggle profiles from the legend."
       class="h-full w-full"
     />
+    <div
+      v-if="detailBox"
+      class="pointer-events-none absolute flex items-start justify-center rounded-md pt-2 ring-1 ring-foreground/15"
+      :style="{ left: `${detailBox.left}px`, top: `${detailBox.top}px`, width: `${detailBox.width}px`, height: `${detailBox.height}px` }"
+    >
+      <button
+        type="button"
+        class="pointer-events-auto inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-border bg-background/80 px-3 py-1.5 text-xs font-medium text-foreground shadow-sm backdrop-blur-md transition-colors hover:bg-background"
+        @click="emit('viewDetail', detailBox.phase.id)"
+      >
+        View {{ detailBox.phase.name }} <ArrowRight class="size-3.5" />
+      </button>
+    </div>
   </div>
 </template>

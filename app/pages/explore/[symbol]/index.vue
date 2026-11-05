@@ -235,6 +235,7 @@ const backLabel = computed(() => (backTo.value === '/explore' ? 'Explore' : 'Hom
               :profiles="data.profiles"
               :current-year="data.currentYear"
               :latest-seasons="data.latestSeasons"
+              :start-phase="data.fullSeasonStart"
               :season-filter="seasonTab"
               :trump-enabled="trumpEnabled"
               :brand="bg"
@@ -242,6 +243,7 @@ const backLabel = computed(() => (backTo.value === '/explore' ? 'Explore' : 'Hom
               :symbol="symbol"
               :active-day="activeDay"
               class="h-[360px] sm:h-[480px] lg:h-[540px]"
+              @view-detail="seasonTab = $event"
             />
             <template #fallback>
               <Skeleton class="h-[360px] sm:h-[480px] lg:h-[540px] w-full" />

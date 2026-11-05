@@ -6,6 +6,7 @@ import {
   calculateDailyReturns,
   buildHirschProfile,
   buildFullSeasonProfile,
+  fullSeasonStartPhase,
   buildCurrentYearProfile,
   buildLatestSeasons,
   type LatestSeason,
@@ -80,6 +81,7 @@ export interface SeasonalResponse {
   profiles: SeasonalProfile[]
   currentYear?: { year: number; points: Point[] }
   latestSeasons: LatestSeason[]
+  fullSeasonStart: number
 }
 
 export function computeSeasonal(symbol: string, rows: Row[], now = new Date()): SeasonalResponse {
@@ -103,13 +105,14 @@ export function computeSeasonal(symbol: string, rows: Row[], now = new Date()): 
       years,
       points: buildHirschProfile(histReturns),
     })
-    const fullSeasonYears = years.filter((year) => year % 4 === 0 && years.includes(year + 3))
+    const startPhase = fullSeasonStartPhase(currentYear)
+    const fullSeasonYears = years.filter((year) => (((year - startPhase) % 4) + 4) % 4 === 0 && [1, 2, 3].every((n) => years.includes(year + n)))
     if (fullSeasonYears.length) {
       profiles.push({
         id: 'full-seasons',
         label: 'Full Seasons',
         years: fullSeasonYears.flatMap((year) => [year, year + 1, year + 2, year + 3]),
-        points: buildFullSeasonProfile(histReturns),
+        points: buildFullSeasonProfile(histReturns, startPhase),
       })
     }
   }
@@ -154,6 +157,7 @@ export function computeSeasonal(symbol: string, rows: Row[], now = new Date()): 
     },
     profiles,
     currentYear: currentPoints.length ? { year: currentYear, points: currentPoints } : undefined,
+    fullSeasonStart: fullSeasonStartPhase(currentYear),
     latestSeasons: buildLatestSeasons(calculateDailyReturns(rows.map(toPriceRow)), currentYear),
   }
 }

@@ -46,21 +46,26 @@ export function buildHirschProfile(returns: RetRow[]): Point[] {
   return out
 }
 
-export function buildFullSeasonProfile(returns: RetRow[]): Point[] {
+// Phase (year % 4) that opens the Full Seasons window so the current year always sits in the last box.
+export function fullSeasonStartPhase(currentYear: number): number {
+  return (((currentYear - 3) % 4) + 4) % 4
+}
+
+export function buildFullSeasonProfile(returns: RetRow[], startPhase = 0): Point[] {
   const cycles = new Map<number, RetRow[]>()
   for (const row of returns) {
-    const electionYear = row.year - (row.year % 4)
-    const cycle = cycles.get(electionYear) ?? []
+    const cycleStart = row.year - ((((row.year - startPhase) % 4) + 4) % 4)
+    const cycle = cycles.get(cycleStart) ?? []
     cycle.push(row)
-    cycles.set(electionYear, cycle)
+    cycles.set(cycleStart, cycle)
   }
 
   const daily = new Map<number, { sum: number; n: number }>()
-  for (const cycle of cycles.values()) {
+  for (const [cycleStart, cycle] of cycles) {
     const years = new Set(cycle.map((row) => row.year))
     if (years.size !== 4) continue
     for (const row of cycle) {
-      const day = Math.floor(((Date.UTC(row.year, 0, 1) + (row.doy - 1) * 86400000) - Date.UTC(row.year - (row.year % 4), 0, 1)) / 86400000)
+      const day = Math.floor(((Date.UTC(row.year, 0, 1) + (row.doy - 1) * 86400000) - Date.UTC(cycleStart, 0, 1)) / 86400000)
       const acc = daily.get(day) ?? { sum: 0, n: 0 }
       acc.sum += row.ret
       acc.n += 1
@@ -92,15 +97,21 @@ export function buildCurrentYearProfile(returns: RetRow[], year: number): Point[
 
 export type LatestSeason = { id: string; label: string; year: number; points: Point[] }
 
-// Latest year (<= currentYear) of each election-cycle phase, plotted on the 4-year Full Seasons axis.
+// Rolling 4-box window [Y-3, Y-2, Y-1, Y]: consecutive years, current year always last.
 export function buildLatestSeasons(returns: RetRow[], currentYear: number): LatestSeason[] {
   const out: LatestSeason[] = []
-  for (const phase of [0, 1, 2, 3]) {
-    const year = currentYear - ((((currentYear - phase) % 4) + 4) % 4)
-    const offset = Math.round((Date.UTC(year, 0, 1) - Date.UTC(year - (year % 4), 0, 1)) / 86400000)
-    const points = buildCurrentYearProfile(returns, year).map((p) => ({ ...p, day: p.day + offset }))
+  const windowStart = currentYear - 3
+  let carry = 1 // each box continues from where the previous box ended
+  for (let box = 0; box < 4; box++) {
+    const year = windowStart + box
+    const offset = Math.round((Date.UTC(year, 0, 1) - Date.UTC(windowStart, 0, 1)) / 86400000)
+    const points = buildCurrentYearProfile(returns, year).map((p) => {
+      const factor = carry * p.factor
+      return { day: p.day + offset, factor, pct: (factor - 1) * 100 }
+    })
     if (!points.length) continue
-    const label = CYCLE_LABELS[phase]!
+    carry = points[points.length - 1]!.factor
+    const label = CYCLE_LABELS[((year % 4) + 4) % 4]!
     out.push({ id: label.toLowerCase().replace(/\s+/g, '-'), label, year, points })
   }
   return out

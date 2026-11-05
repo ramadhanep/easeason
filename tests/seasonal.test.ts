@@ -5,6 +5,7 @@ import {
   buildHirschProfile,
   buildCurrentYearProfile,
   buildLatestSeasons,
+  fullSeasonStartPhase,
   TRUMP_YEARS,
 } from '../server/utils/math'
 import type { PriceRow } from '../server/utils/math'
@@ -95,19 +96,33 @@ describe('current year profile', () => {
 
 describe('latest seasons', () => {
   const ret = (year: number) => [{ doy: 2, year, ret: 0.1 }, { doy: 3, year, ret: 0.1 }]
-  const all = [2023, 2024, 2025, 2026, 2027].flatMap(ret)
+  const all = [2023, 2024, 2025, 2026, 2027, 2028].flatMap(ret)
+  const order = (year: number) => buildLatestSeasons(all, year).map((x) => [x.label, x.year])
 
-  it('picks latest year per phase and offsets days onto the 4-year axis', () => {
-    const s = buildLatestSeasons(all, 2026)
-    expect(s.map((x) => [x.label, x.year])).toEqual([['Election', 2024], ['Post-Election', 2025], ['Mid-Term', 2026], ['Pre-Election', 2023]])
-    expect(s[0].points[0].day).toBe(2) // 2024 election: block offset 0
-    expect(s[1].points[0].day).toBe(366 + 2) // 2025: after leap 2024
-    expect(s[3].points[0].day).toBe(1096 + 2) // 2023: 366+365+365
+  it('keeps the current year in the last box and the cycle order fixed', () => {
+    expect(order(2026)).toEqual([['Pre-Election', 2023], ['Election', 2024], ['Post-Election', 2025], ['Mid-Term', 2026]])
+    expect(order(2027)).toEqual([['Election', 2024], ['Post-Election', 2025], ['Mid-Term', 2026], ['Pre-Election', 2027]])
+    expect(order(2028)).toEqual([['Post-Election', 2025], ['Mid-Term', 2026], ['Pre-Election', 2027], ['Election', 2028]])
   })
 
-  it('rolls pre-election forward when the new year arrives', () => {
-    const s = buildLatestSeasons(all, 2027)
-    expect(s.find((x) => x.label === 'Pre-Election')!.year).toBe(2027)
-    expect(s.find((x) => x.label === 'Mid-Term')!.year).toBe(2026)
+  it('offsets days onto the 4-year axis', () => {
+    const s = buildLatestSeasons(all, 2026) // window 2023..2026
+    expect(s[0].points[0].day).toBe(2)
+    expect(s[1].points[0].day).toBe(365 + 2)
+    expect(s[2].points[0].day).toBe(365 + 366 + 2)
+    expect(s[3].points[0].day).toBe(365 + 366 + 365 + 2)
+  })
+
+  it('chains each box from the previous box end instead of resetting to 0', () => {
+    const s = buildLatestSeasons(all, 2026)
+    expect(s[0].points[0].factor).toBeCloseTo(1.1)
+    for (let i = 1; i < 4; i++) expect(s[i].points[0].factor).toBeCloseTo(s[i - 1].points.at(-1)!.factor * 1.1)
+  })
+
+  it('opens the window so the current year is last', () => {
+    expect(fullSeasonStartPhase(2026)).toBe(3)
+    expect(fullSeasonStartPhase(2027)).toBe(0)
+    expect(fullSeasonStartPhase(2028)).toBe(1)
+    expect(fullSeasonStartPhase(2029)).toBe(2)
   })
 })
