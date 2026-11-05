@@ -12,6 +12,7 @@ const { data, pending, error } = await useFetch('/api/seasonal', {
 const seasonTab = ref(data.value?.profiles.some((p) => p.id === 'full-seasons') ? 'full-seasons' : 'all-years')
 const horizonDays = computed(() => seasonTab.value === 'full-seasons' ? 1461 : 365)
 const view = ref<'chart' | 'stats' | 'animate'>('chart')
+const VIEW_TABS = [{ id: 'chart', label: 'Chart' }, { id: 'stats', label: 'Statistics' }, { id: 'animate', label: 'Animate' }]
 const chartRef = ref<{ exportPng: () => void; setZoom: (end: number) => void; resetZoom: () => void } | null>(null)
 const colorMode = useColorMode()
 const isDark = computed(() => colorMode.value === 'dark')
@@ -20,7 +21,7 @@ const animating = ref(false)
 const activeDay = ref<number | null>(null)
 let animTimer: ReturnType<typeof setInterval> | null = null
 
-const SPEED_OPTIONS = [0.5, 1, 2, 4]
+const SPEED_OPTIONS = [0.5, 1, 2, 4].map((n) => ({ id: n, label: `${n}x` }))
 const animSpeed = ref(1)
 
 function runFrom(startDay: number) {
@@ -51,6 +52,16 @@ function playAnimation() {
   view.value = 'animate'
   const start = activeDay.value == null || activeDay.value >= horizonDays.value ? 1 : activeDay.value
   runFrom(start)
+}
+
+function onView(v: typeof view.value) {
+  if (v === 'animate') return animating.value ? stopAnimation() : startAnimation()
+  stopAnimation()
+  view.value = v
+  if (v === 'chart') {
+    activeDay.value = null
+    chartRef.value?.resetZoom()
+  }
 }
 
 function stopAnimation() {
@@ -127,14 +138,14 @@ const backLabel = computed(() => (backTo.value === '/explore' ? 'Explore' : 'Hom
 </script>
 
 <template>
-  <div class="min-h-screen bg-background text-foreground">
+  <div class="min-h-dvh bg-background text-foreground">
     <div class="mx-auto max-w-5xl px-4 py-8">
       <AppHeader :to="backTo" :label="backLabel" :brand="bg" :symbol="symbol" />
 
       <div v-if="pending" class="space-y-4">
         <Skeleton class="h-8 w-48" />
         <Skeleton class="h-4 w-32" />
-        <Skeleton class="h-[540px] w-full" />
+        <Skeleton class="h-[360px] sm:h-[480px] lg:h-[540px] w-full" />
       </div>
 
       <div v-else-if="error" class="py-24 text-center">
@@ -170,64 +181,30 @@ const backLabel = computed(() => (backTo.value === '/explore' ? 'Explore' : 'Hom
 
         <div class="rounded-[2rem] bg-background/40 backdrop-blur-xl">
           <div class="mb-3 flex items-center justify-between gap-3 flex-wrap px-1">
-            <div class="inline-flex items-center gap-1 rounded-full bg-muted p-1">
-              <button
-                :class="view !== 'chart' ? 'text-muted-foreground' : ''"
-                :style="view === 'chart' ? { backgroundColor: bg ?? 'var(--background)', color: fg } : {}"
-                class="rounded-full px-4 py-1.5 text-sm font-medium transition-colors cursor-pointer"
-                :aria-pressed="view === 'chart'"
-                @click="view = 'chart'; stopAnimation(); activeDay = null; chartRef?.resetZoom()"
-              >
-                Chart
-              </button>
-              <button
-                :class="view !== 'stats' ? 'text-muted-foreground' : ''"
-                :style="view === 'stats' ? { backgroundColor: bg ?? 'var(--background)', color: fg } : {}"
-                class="rounded-full px-4 py-1.5 text-sm font-medium transition-colors cursor-pointer"
-                :aria-pressed="view === 'stats'"
-                @click="view = 'stats'; stopAnimation()"
-              >
-                Statistics
-              </button>
-              <button
-                :class="view !== 'animate' ? 'text-muted-foreground' : ''"
-                :style="view === 'animate' ? { backgroundColor: bg ?? 'var(--background)', color: fg } : {}"
-                class="rounded-full px-4 py-1.5 text-sm font-medium transition-colors cursor-pointer"
-                :aria-pressed="view === 'animate'"
-                @click="animating ? stopAnimation() : startAnimation()"
-              >
-                Animate
-              </button>
-            </div>
+            <SegmentedControl
+              :model-value="view"
+              :options="VIEW_TABS"
+              :brand="bg"
+              :fg="fg"
+              @update:model-value="onView($event as typeof view)"
+            />
             <div class="flex items-center gap-2">
-              <Button variant="outline" size="sm" class="gap-1.5 cursor-pointer rounded-full" aria-label="Download chart as PNG" @click="chartRef?.exportPng()">
+              <Button variant="outline" size="sm" class="h-10 gap-1.5 cursor-pointer rounded-full sm:h-9" aria-label="Download chart as PNG" @click="chartRef?.exportPng()">
                 <Download class="size-4" /> <span class="hidden sm:inline">.PNG</span>
               </Button>
-              <NuxtLink :to="`/explore/${symbol}/context`" aria-label="Open context" class="inline-flex items-center gap-1.5 rounded-full border border-input bg-transparent px-3 py-1.5 text-sm shadow-xs hover:bg-accent hover:text-accent-foreground cursor-pointer">
+              <NuxtLink :to="`/explore/${symbol}/context`" aria-label="Open context" class="inline-flex h-10 items-center gap-1.5 rounded-full border border-input bg-transparent px-3 text-sm sm:h-9 shadow-xs hover:bg-accent hover:text-accent-foreground cursor-pointer">
                 <FileText class="size-4" /> <span class="hidden sm:inline">Context</span>
               </NuxtLink>
             </div>
           </div>
 
-          <div v-if="view === 'chart'" class="mb-3 flex items-center gap-2 overflow-x-auto px-1">
-            <div class="inline-flex items-center gap-1 rounded-full bg-muted p-1 shrink-0">
-              <button
-                v-for="t in seasonTabs"
-                :key="t.id"
-                :class="seasonTab !== t.id ? 'text-muted-foreground' : ''"
-                :style="seasonTab === t.id ? { backgroundColor: bg ?? 'var(--background)', color: fg } : {}"
-                class="rounded-full px-4 py-1 text-xs font-medium transition-colors cursor-pointer whitespace-nowrap"
-                :aria-pressed="seasonTab === t.id"
-                @click="seasonTab = t.id"
-              >
-                {{ t.label }}
-              </button>
-            </div>
+          <div v-if="view === 'chart'" class="mb-3 flex items-center gap-2 overflow-x-auto px-1 [scrollbar-width:none] max-sm:[mask-image:linear-gradient(to_right,#000_calc(100%-1.5rem),transparent)]">
+            <SegmentedControl v-model="seasonTab" :options="seasonTabs" :brand="bg" :fg="fg" />
             <button
               v-if="data.profiles.some(p => p.id === 'trump-years')"
-              :class="!trumpEnabled ? 'text-muted-foreground' : ''"
+              :class="!trumpEnabled ? 'bg-muted text-muted-foreground hover:text-foreground' : ''"
               :style="trumpEnabled ? { backgroundColor: bg ?? 'var(--background)', color: fg } : {}"
-              class="rounded-full px-4 py-1 text-xs font-medium transition-colors cursor-pointer whitespace-nowrap shrink-0"
+              class="shrink-0 cursor-pointer whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-medium transition-colors sm:py-2"
               :aria-pressed="trumpEnabled"
               @click="trumpEnabled = !trumpEnabled"
             >
@@ -240,21 +217,9 @@ const backLabel = computed(() => (backTo.value === '/explore' ? 'Explore' : 'Hom
           </p>
 
           <div v-if="view === 'animate'" class="mb-3 flex items-center gap-2 px-1">
-            <div class="inline-flex items-center gap-1 rounded-full bg-muted p-1 shrink-0">
-              <button
-                v-for="s in SPEED_OPTIONS"
-                :key="s"
-                :class="animSpeed !== s ? 'text-muted-foreground' : ''"
-                :style="animSpeed === s ? { backgroundColor: bg ?? 'var(--background)', color: fg } : {}"
-                class="rounded-full px-4 py-1 text-xs font-medium transition-colors cursor-pointer whitespace-nowrap"
-                :aria-pressed="animSpeed === s"
-                @click="animSpeed = s"
-              >
-                {{ s }}x
-              </button>
-            </div>
+            <SegmentedControl v-model="animSpeed" :options="SPEED_OPTIONS" :brand="bg" :fg="fg" />
             <button
-              class="inline-flex items-center justify-center size-7 rounded-full bg-muted transition-colors cursor-pointer shrink-0"
+              class="inline-flex items-center justify-center size-10 sm:size-9 rounded-full bg-muted transition-colors cursor-pointer shrink-0"
               :aria-label="animating ? 'Pause' : 'Play'"
               @click="animating ? stopAnimation() : playAnimation()"
             >
@@ -275,10 +240,10 @@ const backLabel = computed(() => (backTo.value === '/explore' ? 'Explore' : 'Hom
               :is-dark="isDark"
               :symbol="symbol"
               :active-day="activeDay"
-              class="h-[540px]"
+              class="h-[360px] sm:h-[480px] lg:h-[540px]"
             />
             <template #fallback>
-              <Skeleton class="h-[540px] w-full" />
+              <Skeleton class="h-[360px] sm:h-[480px] lg:h-[540px] w-full" />
             </template>
           </ClientOnly>
 
@@ -287,7 +252,7 @@ const backLabel = computed(() => (backTo.value === '/explore' ? 'Explore' : 'Hom
               <table class="w-full text-sm">
                 <thead>
                   <tr class="text-xs text-muted-foreground border-b">
-                    <th class="px-4 py-2.5 text-left font-medium">Profile</th>
+                    <th class="sticky left-0 bg-background px-4 py-2.5 text-left font-medium">Profile</th>
                     <th class="px-4 py-2.5 text-right font-medium">Avg %</th>
                     <th class="px-4 py-2.5 text-right font-medium">Median %</th>
                     <th class="px-4 py-2.5 text-right font-medium">Std Dev</th>
@@ -299,7 +264,7 @@ const backLabel = computed(() => (backTo.value === '/explore' ? 'Explore' : 'Hom
                 </thead>
                 <tbody>
                   <tr v-for="s in stats" :key="s.label" class="border-b last:border-0">
-                    <td class="px-4 py-2.5 font-medium">{{ s.label }}</td>
+                    <td class="sticky left-0 bg-background px-4 py-2.5 font-medium">{{ s.label }}</td>
                     <td class="px-4 py-2.5 text-right font-mono">{{ fmt(s.avg) }}</td>
                     <td class="px-4 py-2.5 text-right font-mono">{{ fmt(s.median) }}</td>
                     <td class="px-4 py-2.5 text-right font-mono">{{ fmt(s.std) }}</td>

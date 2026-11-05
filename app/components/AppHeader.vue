@@ -3,11 +3,11 @@ import { ArrowLeft, Moon, Sun } from '@lucide/vue'
 import { SUPABASE_BASE_URL } from '~/lib/config'
 
 const props = withDefaults(defineProps<{
-  to: string
-  label: string
+  to?: string
+  label?: string
   brand?: string
   symbol?: string
-}>(), { brand: undefined })
+}>(), { to: undefined, label: undefined, brand: undefined, symbol: undefined })
 
 const logoUrl = computed(() => {
   if (!props.symbol) return '/aruna.png'
@@ -24,6 +24,12 @@ const logoUrl = computed(() => {
 })
 const glass = computed(() => {
   if (!props.brand) return {}
+  if (!props.to) {
+    return {
+      backgroundColor: `${props.brand}22`,
+      backgroundImage: `radial-gradient(120% 100% at 0% 0%, ${props.brand}3d 0%, transparent 50%), radial-gradient(120% 100% at 100% 100%, ${props.brand}29 0%, transparent 50%)`,
+    }
+  }
   return {
     backgroundColor: `${props.brand}45`,
     borderColor: `${props.brand}8C`,
@@ -38,13 +44,14 @@ onMounted(() => { mounted.value = true })
 </script>
 
 <template>
-  <div class="fixed inset-x-0 top-3 z-40 flex justify-center px-4 pointer-events-none">
+  <div class="fixed inset-x-0 top-[max(0.75rem,env(safe-area-inset-top))] z-40 flex justify-center px-4 pointer-events-none">
     <div
       class="w-full max-w-2xl pointer-events-auto rounded-[2rem] border border-white/10 dark:border-white/10 bg-white/40 dark:bg-white/[0.06] backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] overflow-hidden p-2 transition-all duration-300 ease-out"
       :style="glass"
     >
       <div class="flex items-center justify-between gap-2">
         <NuxtLink
+          v-if="to"
           :to="to"
           class="inline-flex min-w-0 shrink items-center gap-1.5 rounded-full bg-white/50 dark:bg-white/10 h-12 pl-3 pr-5 text-sm font-medium text-foreground/80 backdrop-blur-xl cursor-pointer"
         >
@@ -52,7 +59,7 @@ onMounted(() => { mounted.value = true })
           <ArrowLeft class="size-5 shrink-0" />
           <span class="truncate">{{ label }}</span>
         </NuxtLink>
-        <div class="ml-auto sm:ml-0 sm:flex-1 sm:min-w-0">
+        <div class="ml-auto sm:ml-0 sm:flex-1 sm:min-w-0" :class="{ 'flex-1 ml-0': !to }">
           <SymbolSearch />
         </div>
         <div class="flex items-center gap-1">

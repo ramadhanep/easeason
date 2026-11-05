@@ -8,7 +8,7 @@ const brand = computed(() => BRAND_COLORS[props.symbol])
 <template>
   <NuxtLink
     :to="`/explore/${symbol}`"
-    class="group relative flex min-w-0 flex-col justify-between overflow-hidden rounded-2xl border border-border/60 bg-card p-4 text-left transition-all hover:-translate-y-0.5 hover:border-[var(--brand,var(--border))] hover:shadow-md"
+    class="group relative flex min-w-0 flex-col justify-between overflow-hidden rounded-2xl border border-border/60 bg-card p-4 text-left transition-all active:scale-[0.98] [@media(hover:hover)]:hover:-translate-y-0.5 hover:border-[var(--brand,var(--border))] hover:shadow-md"
     :style="brand ? { '--brand': brand, backgroundImage: `linear-gradient(135deg, ${brand}24 0%, transparent 65%)` } : {}"
   >
     <div class="flex items-center justify-between gap-2">

@@ -14,7 +14,7 @@ const visible = computed(() =>
 </script>
 
 <template>
-  <div class="min-h-screen bg-background text-foreground">
+  <div class="min-h-dvh bg-background text-foreground">
     <div class="mx-auto max-w-2xl px-4 py-8">
       <AppHeader to="/" label="Home" />
 
