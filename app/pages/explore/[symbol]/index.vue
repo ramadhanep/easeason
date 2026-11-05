@@ -234,6 +234,7 @@ const backLabel = computed(() => (backTo.value === '/explore' ? 'Explore' : 'Hom
               ref="chartRef"
               :profiles="data.profiles"
               :current-year="data.currentYear"
+              :latest-seasons="data.latestSeasons"
               :season-filter="seasonTab"
               :trump-enabled="trumpEnabled"
               :brand="bg"

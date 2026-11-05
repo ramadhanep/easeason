@@ -4,6 +4,7 @@ import {
   calculateDailyReturns,
   buildHirschProfile,
   buildCurrentYearProfile,
+  buildLatestSeasons,
   TRUMP_YEARS,
 } from '../server/utils/math'
 import type { PriceRow } from '../server/utils/math'
@@ -89,5 +90,24 @@ describe('current year profile', () => {
     expect(points.map((p) => p.day)).toEqual([1, 2])
     expect(points[0].factor).toBe(1)
     expect(points[1].factor).toBeCloseTo(1.5)
+  })
+})
+
+describe('latest seasons', () => {
+  const ret = (year: number) => [{ doy: 2, year, ret: 0.1 }, { doy: 3, year, ret: 0.1 }]
+  const all = [2023, 2024, 2025, 2026, 2027].flatMap(ret)
+
+  it('picks latest year per phase and offsets days onto the 4-year axis', () => {
+    const s = buildLatestSeasons(all, 2026)
+    expect(s.map((x) => [x.label, x.year])).toEqual([['Election', 2024], ['Post-Election', 2025], ['Mid-Term', 2026], ['Pre-Election', 2023]])
+    expect(s[0].points[0].day).toBe(2) // 2024 election: block offset 0
+    expect(s[1].points[0].day).toBe(366 + 2) // 2025: after leap 2024
+    expect(s[3].points[0].day).toBe(1096 + 2) // 2023: 366+365+365
+  })
+
+  it('rolls pre-election forward when the new year arrives', () => {
+    const s = buildLatestSeasons(all, 2027)
+    expect(s.find((x) => x.label === 'Pre-Election')!.year).toBe(2027)
+    expect(s.find((x) => x.label === 'Mid-Term')!.year).toBe(2026)
   })
 })

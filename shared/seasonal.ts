@@ -24,6 +24,7 @@ export interface SeasonalData {
   meta: SeasonalMeta
   profiles: SeasonalProfile[]
   currentYear?: { year: number; points: SeasonalPoint[] }
+  latestSeasons?: Array<{ id: string; label: string; year: number; points: SeasonalPoint[] }>
 }
 
 export interface ProfileStats {

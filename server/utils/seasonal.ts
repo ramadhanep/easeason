@@ -7,6 +7,8 @@ import {
   buildHirschProfile,
   buildFullSeasonProfile,
   buildCurrentYearProfile,
+  buildLatestSeasons,
+  type LatestSeason,
   type PriceRow,
   type Point,
 } from './math'
@@ -77,6 +79,7 @@ export interface SeasonalResponse {
   }
   profiles: SeasonalProfile[]
   currentYear?: { year: number; points: Point[] }
+  latestSeasons: LatestSeason[]
 }
 
 export function computeSeasonal(symbol: string, rows: Row[], now = new Date()): SeasonalResponse {
@@ -151,6 +154,7 @@ export function computeSeasonal(symbol: string, rows: Row[], now = new Date()): 
     },
     profiles,
     currentYear: currentPoints.length ? { year: currentYear, points: currentPoints } : undefined,
+    latestSeasons: buildLatestSeasons(calculateDailyReturns(rows.map(toPriceRow)), currentYear),
   }
 }
 

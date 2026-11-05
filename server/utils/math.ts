@@ -89,3 +89,19 @@ export function buildCurrentYearProfile(returns: RetRow[], year: number): Point[
   }
   return out
 }
+
+export type LatestSeason = { id: string; label: string; year: number; points: Point[] }
+
+// Latest year (<= currentYear) of each election-cycle phase, plotted on the 4-year Full Seasons axis.
+export function buildLatestSeasons(returns: RetRow[], currentYear: number): LatestSeason[] {
+  const out: LatestSeason[] = []
+  for (const phase of [0, 1, 2, 3]) {
+    const year = currentYear - ((((currentYear - phase) % 4) + 4) % 4)
+    const offset = Math.round((Date.UTC(year, 0, 1) - Date.UTC(year - (year % 4), 0, 1)) / 86400000)
+    const points = buildCurrentYearProfile(returns, year).map((p) => ({ ...p, day: p.day + offset }))
+    if (!points.length) continue
+    const label = CYCLE_LABELS[phase]!
+    out.push({ id: label.toLowerCase().replace(/\s+/g, '-'), label, year, points })
+  }
+  return out
+}

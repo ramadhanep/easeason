@@ -34,6 +34,13 @@ interface SeasonalProfile {
   points: SeasonalPoint[]
 }
 
+interface LatestSeason {
+  id: string
+  label: string
+  year: number
+  points: SeasonalPoint[]
+}
+
 interface CurrentYear {
   year: number
   points: SeasonalPoint[]
@@ -43,6 +50,7 @@ const props = withDefaults(
   defineProps<{
     profiles: SeasonalProfile[]
     currentYear?: CurrentYear
+    latestSeasons?: LatestSeason[]
     seasonFilter?: string
     trumpEnabled?: boolean
     brand?: string
@@ -50,7 +58,7 @@ const props = withDefaults(
     symbol?: string
     activeDay?: number | null
   }>(),
-  { isDark: false, symbol: '', currentYear: undefined, seasonFilter: 'all-years', trumpEnabled: false, brand: undefined, activeDay: null },
+  { isDark: false, symbol: '', currentYear: undefined, latestSeasons: () => [], seasonFilter: 'all-years', trumpEnabled: false, brand: undefined, activeDay: null },
 )
 
 const chartRef = ref<InstanceType<typeof VChart> | null>(null)
@@ -263,6 +271,27 @@ const option = computed(() => {
     })
   }
 
+  const yearRange = new Map<string, [number, number]>()
+  if (props.seasonFilter === 'full-seasons') {
+    for (const s of props.latestSeasons) {
+      const name = `${s.year} ${s.label}${s.year === props.currentYear?.year ? ' YTD' : ''}`
+      const color = colors[s.id] || '#6b7280'
+      yearRange.set(name, [s.points[0]!.day, s.points[s.points.length - 1]!.day])
+      allSeries.push({
+        name,
+        type: 'line',
+        showSymbol: false,
+        smooth: true,
+        data: s.points.map((p) => [p.day, p.pct]),
+        emphasis: { focus: 'series' },
+        lineStyle: { width: 2, color },
+        itemStyle: { color },
+        z: 4,
+        animationDurationUpdate: 0,
+      })
+    }
+  }
+
   if (props.trumpEnabled && props.seasonFilter !== 'full-seasons') {
     const trump = props.profiles.find((p) => p.id === 'trump-years')
     if (trump) {
@@ -300,12 +329,15 @@ const option = computed(() => {
   const overlaySeries: any[] = []
   if (effectiveDay.value != null) {
     const target = effectiveDay.value
+    const resting = props.activeDay == null && hoverDay.value == null
     allSeries.forEach((s) => {
       const pts = s.data as Array<[number, number]>
-      const hit = pts.find((p) => p[0] === target) ?? [...pts].reverse().find((p) => p[0] <= target)
-      if (!hit) return
+      const range = yearRange.get(s.name)
+      const hidden = range && !resting && (target < range[0] || target > range[1])
+      const hit = hidden ? undefined : (pts.find((p) => p[0] === target) ?? [...pts].reverse().find((p) => p[0] <= target))
       const color = s.itemStyle.color as string
       overlaySeries.push({
+        id: `dot:${s.name}`,
         name: s.name,
         type: 'effectScatter',
         symbol: 'circle',
@@ -334,13 +366,14 @@ const option = computed(() => {
           },
         },
         zlevel: 1,
-        data: [{ name: s.name, value: [hit[0], hit[1]] }],
+        data: hit ? [{ name: s.name, value: [hit[0], hit[1]] }] : [],
       })
     })
   }
 
   return {
     backgroundColor: 'transparent',
+    animationDurationUpdate: 0,
     tooltip: {
       trigger: 'axis',
       backgroundColor: tooltipBg,
@@ -348,7 +381,12 @@ const option = computed(() => {
       textStyle: { color: textColor, fontSize: 12 },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       formatter: (params: any[]) => {
-        const linePoints = params.filter((p) => Array.isArray(p.data))
+        const hover = params[0]?.axisValue
+        const linePoints = params.filter((p) => {
+          if (!Array.isArray(p.data)) return false
+          const r = yearRange.get(p.seriesName)
+          return !r || typeof hover !== 'number' || (hover >= r[0] - 1 && hover <= r[1] + 1)
+        })
         if (!linePoints.length) return ''
         const day = linePoints[0].data[0]
         const dateStr = monthLabel(day)
@@ -401,7 +439,7 @@ const option = computed(() => {
       splitLine: { lineStyle: { color: gridColor } },
       axisLine: { show: true, lineStyle: { color: gridColor, width: 1 } },
     },
-    series: [...allSeries, ...overlaySeries],
+    series: [...allSeries.map((s) => ({ ...s, id: `line:${s.name}` })), ...overlaySeries],
   }
 })
 </script>
