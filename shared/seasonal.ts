@@ -25,6 +25,7 @@ export interface SeasonalData {
   profiles: SeasonalProfile[]
   currentYear?: { year: number; points: SeasonalPoint[] }
   fullSeasonStart?: number
+  monthly?: Array<{ year: number; months: Array<number | null> }>
   latestSeasons?: Array<{ id: string; label: string; year: number; points: SeasonalPoint[] }>
 }
 

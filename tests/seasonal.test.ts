@@ -126,3 +126,18 @@ describe('latest seasons', () => {
     expect(fullSeasonStartPhase(2029)).toBe(2)
   })
 })
+
+describe('monthly returns', () => {
+  it('compounds daily returns per month and leaves empty months null', async () => {
+    const { buildMonthlyReturns } = await import('../server/utils/math')
+    const rows = buildMonthlyReturns([
+      { year: 2020, doy: 2, ret: 0.1 },
+      { year: 2020, doy: 3, ret: 0.1 },
+      { year: 2020, doy: 40, ret: -0.5 }, // Feb 9
+    ])
+    expect(rows).toHaveLength(1)
+    expect(rows[0]!.months[0]).toBeCloseTo(21)
+    expect(rows[0]!.months[1]).toBeCloseTo(-50)
+    expect(rows[0]!.months[2]).toBeNull()
+  })
+})

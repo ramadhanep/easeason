@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { Search, ArrowRight } from '@lucide/vue'
 
-const props = withDefaults(defineProps<{ placeholder?: string; variant?: 'compact' | 'hero' }>(), { placeholder: undefined, variant: 'compact' })
+const props = withDefaults(defineProps<{ placeholder?: string; variant?: 'compact' | 'hero'; pick?: boolean }>(), { placeholder: undefined, variant: 'compact', pick: false })
+const emit = defineEmits<{ select: [symbol: string] }>()
 
 const router = useRouter()
 const { data: groups } = await useFetch('/api/symbols')
@@ -22,7 +23,8 @@ const filtered = computed(() => {
 function select(symbol: string) {
   open.value = false
   query.value = ''
-  router.push(`/explore/${symbol}`)
+  if (props.pick) emit('select', symbol)
+  else router.push(`/explore/${symbol}`)
 }
 
 function onKey(e: KeyboardEvent) {

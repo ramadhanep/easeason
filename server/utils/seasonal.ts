@@ -9,6 +9,8 @@ import {
   fullSeasonStartPhase,
   buildCurrentYearProfile,
   buildLatestSeasons,
+  buildMonthlyReturns,
+  type MonthlyRow,
   type LatestSeason,
   type PriceRow,
   type Point,
@@ -82,6 +84,7 @@ export interface SeasonalResponse {
   currentYear?: { year: number; points: Point[] }
   latestSeasons: LatestSeason[]
   fullSeasonStart: number
+  monthly: MonthlyRow[]
 }
 
 export function computeSeasonal(symbol: string, rows: Row[], now = new Date()): SeasonalResponse {
@@ -158,6 +161,7 @@ export function computeSeasonal(symbol: string, rows: Row[], now = new Date()): 
     profiles,
     currentYear: currentPoints.length ? { year: currentYear, points: currentPoints } : undefined,
     fullSeasonStart: fullSeasonStartPhase(currentYear),
+    monthly: buildMonthlyReturns([...histReturns, ...cvReturns]),
     latestSeasons: buildLatestSeasons(calculateDailyReturns(rows.map(toPriceRow)), currentYear),
   }
 }

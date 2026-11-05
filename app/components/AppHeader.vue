@@ -35,6 +35,7 @@ const iconBtn = 'inline-flex size-9 shrink-0 cursor-pointer items-center justify
 
       <nav class="ml-4 hidden items-center gap-1 text-sm sm:flex" aria-label="Main">
         <NuxtLink to="/explore" class="rounded-lg px-3 py-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground" active-class="!text-foreground">Explore</NuxtLink>
+        <NuxtLink to="/compare" class="rounded-lg px-3 py-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground" active-class="!text-foreground">Compare</NuxtLink>
         <NuxtLink to="/research" class="rounded-lg px-3 py-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground" active-class="!text-foreground">Research</NuxtLink>
       </nav>
 

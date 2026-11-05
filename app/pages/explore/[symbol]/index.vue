@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowLeft, Download, CloudOff, FileText, Play, Pause } from '@lucide/vue'
+import { ArrowLeft, GitCompareArrows, Download, CloudOff, FileText, Play, Pause } from '@lucide/vue'
 import { computeStats, profileDescription, type ProfileStats } from '#shared/seasonal'
 const route = useRoute()
 const symbol = computed(() => route.params.symbol as string)
@@ -9,7 +9,9 @@ const { data, pending, error } = await useFetch('/api/seasonal', {
   watch: [symbol],
 })
 
-const seasonTab = ref(data.value?.profiles.some((p) => p.id === 'full-seasons') ? 'full-seasons' : 'all-years')
+const defaultTab = data.value?.profiles.some((p) => p.id === 'full-seasons') ? 'full-seasons' : 'all-years'
+const queryTab = route.query.tab as string | undefined
+const seasonTab = ref(queryTab && data.value?.profiles.some((p) => p.id === queryTab) ? queryTab : defaultTab)
 const horizonDays = computed(() => seasonTab.value === 'full-seasons' ? 1461 : 365)
 const view = ref<'chart' | 'stats' | 'animate'>('chart')
 const VIEW_TABS = [{ id: 'chart', label: 'Chart' }, { id: 'stats', label: 'Statistics' }, { id: 'animate', label: 'Animate' }]
@@ -104,7 +106,15 @@ const seasonTabs = computed(() => {
   return SEASON_TABS.filter((t) => ids.has(t.id))
 })
 
-const trumpEnabled = ref(false)
+const trumpEnabled = ref(route.query.trump === '1' && !!data.value?.profiles.some((p) => p.id === 'trump-years'))
+
+// Keep tab + trump toggle in the URL so a chart state can be shared.
+watch([seasonTab, trumpEnabled], ([tab, trump]) => {
+  navigateTo({
+    query: { ...route.query, tab: tab === defaultTab ? undefined : tab, trump: trump ? '1' : undefined },
+    replace: true,
+  })
+})
 
 const stats = computed<ProfileStats[]>(() =>
   (data.value?.profiles ?? []).map((p) => computeStats(p.label, p.points)),
@@ -211,6 +221,12 @@ const backLabel = computed(() => (backTo.value === '/explore' ? 'Explore' : 'Hom
               >
                 <Download class="size-4" /> <span class="hidden sm:inline">PNG</span>
               </button>
+              <NuxtLink
+                :to="`/compare?a=${encodeURIComponent(symbol)}`"
+                class="inline-flex h-10 items-center gap-1.5 rounded-lg border border-border px-3 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:h-9"
+              >
+                <GitCompareArrows class="size-4" /> <span class="hidden sm:inline">Compare</span>
+              </NuxtLink>
               <NuxtLink
                 :to="`/explore/${symbol}/context`"
                 aria-label="Open context"
@@ -324,6 +340,19 @@ const backLabel = computed(() => (backTo.value === '/explore' ? 'Explore' : 'Hom
           <div class="surface p-4">
             <p class="text-xs text-muted-foreground">Days positive</p>
             <p class="mt-1 font-mono text-xl font-semibold tabular-nums">{{ activeStats.winRate.toFixed(0) }}%</p>
+          </div>
+        </section>
+
+        <!-- Monthly heatmap -->
+        <section v-if="data.monthly?.length" class="mt-12">
+          <div class="mb-4 flex flex-wrap items-end justify-between gap-2">
+            <div>
+              <h2 class="text-lg font-semibold tracking-tight">Monthly returns</h2>
+              <p class="mt-1 text-sm text-muted-foreground">Calendar-month return per year. Summary rows exclude {{ data.meta.currentYear }} (year in progress).</p>
+            </div>
+          </div>
+          <div class="surface p-3 sm:p-4">
+            <MonthlyHeatmap :monthly="data.monthly" :current-year="data.meta.currentYear" />
           </div>
         </section>
 

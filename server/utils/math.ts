@@ -116,3 +116,17 @@ export function buildLatestSeasons(returns: RetRow[], currentYear: number): Late
   }
   return out
 }
+
+export type MonthlyRow = { year: number; months: Array<number | null> }
+
+// Compounded return (%) per calendar month per year. Months with no data stay null.
+export function buildMonthlyReturns(returns: RetRow[]): MonthlyRow[] {
+  const byYear = new Map<number, Array<number | null>>()
+  for (const r of returns) {
+    const month = new Date(Date.UTC(r.year, 0, r.doy)).getUTCMonth()
+    const months = byYear.get(r.year) ?? Array<number | null>(12).fill(null)
+    months[month] = ((1 + (months[month] ?? 0) / 100) * (1 + r.ret) - 1) * 100
+    byYear.set(r.year, months)
+  }
+  return [...byYear.entries()].sort((a, b) => a[0] - b[0]).map(([year, months]) => ({ year, months }))
+}
