@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ArrowLeft, GitCompareArrows, Download, CloudOff, FileText, Play, Pause } from '@lucide/vue'
-import { computeStats, profileDescription, type ProfileStats } from '#shared/seasonal'
+import { computeStats, fmtNum, profileDescription, type ProfileStats } from '#shared/seasonal'
 const route = useRoute()
 const symbol = computed(() => route.params.symbol as string)
 
@@ -87,10 +87,7 @@ useHead({
   }),
 })
 
-const fmt = (n: number | undefined): string => {
-  if (n == null || !Number.isFinite(n)) return '—'
-  return Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(n)
-}
+const fmt = fmtNum
 
 const totalProfiles = computed(() => data.value?.profiles?.length ?? 0)
 
@@ -128,18 +125,7 @@ const activeStats = computed(() => {
 })
 const signed = (n: number) => `${n >= 0 ? '+' : ''}${fmt(n)}%`
 
-const { data: relatedArticles } = await useAsyncData(`related-${symbol.value}`, () =>
-  queryCollection('research')
-    .select('title', 'description', 'meta', 'path')
-    .all()
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .then((docs: any[]) =>
-      docs
-        .map((d) => ({ ...d, symbol: d.meta?.tags?.[0] ?? d.title.split(' ')[0] }))
-        .filter((a) => a.meta?.tags?.some((t: string) => t.toUpperCase() === symbol.value.toUpperCase()))
-        .sort((a, b) => new Date(b.meta?.publishedOn).getTime() - new Date(a.meta?.publishedOn).getTime()),
-    ),
-)
+const { data: relatedArticles } = await useResearchArticles(`related-${symbol.value}`, symbol.value)
 
 const bg = computed(() => BRAND_COLORS[symbol.value])
 const fg = computed(() => {

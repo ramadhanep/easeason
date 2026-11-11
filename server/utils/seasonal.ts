@@ -13,8 +13,8 @@ import {
   type MonthlyRow,
   type LatestSeason,
   type PriceRow,
-  type Point,
 } from './math'
+import type { SeasonalData, SeasonalProfile } from '#shared/seasonal'
 
 const yf = new YahooFinance({ suppressNotices: ['ripHistorical'] })
 
@@ -64,24 +64,7 @@ function stripIncompleteYears(rows: Row[]): Row[] {
   return rows.filter((r) => (byYear.get(r.date.getUTCFullYear()) ?? 0) >= MIN_DAYS)
 }
 
-export interface SeasonalProfile {
-  id: string
-  label: string
-  years: number[]
-  points: Point[]
-}
-
-export interface SeasonalResponse {
-  meta: {
-    symbol: string
-    name: string
-    currentPrice?: number
-    firstYear?: number
-    lastYear?: number
-    currentYear: number
-  }
-  profiles: SeasonalProfile[]
-  currentYear?: { year: number; points: Point[] }
+export type SeasonalResponse = SeasonalData & {
   latestSeasons: LatestSeason[]
   fullSeasonStart: number
   monthly: MonthlyRow[]

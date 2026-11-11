@@ -3,17 +3,7 @@ import { ArrowRight } from '@lucide/vue'
 
 const { data: groups } = await useFetch('/api/symbols')
 
-const { data: articles } = await useAsyncData('home-research', () =>
-  queryCollection('research')
-    .select('title', 'description', 'meta', 'path')
-    .all()
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .then((docs: any[]) =>
-      docs
-        .map((d) => ({ ...d, symbol: d.meta?.tags?.[0] ?? d.title.split(' ')[0] }))
-        .sort((a, b) => new Date(b.meta?.publishedOn).getTime() - new Date(a.meta?.publishedOn).getTime()),
-    ),
-)
+const { data: articles } = await useResearchArticles('home-research')
 
 const groupedSymbols = computed(() => Object.values(groups.value ?? {}).filter((g) => g.items.length))
 

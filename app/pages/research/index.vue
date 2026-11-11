@@ -5,17 +5,7 @@ description: "Independent notes on market seasonality."
 
 <script setup lang="ts">
 
-const { data: articles } = await useAsyncData('research-index', () =>
-  queryCollection('research')
-    .select('title', 'description', 'meta', 'path')
-    .all()
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .then((docs: any[]) =>
-      docs
-        .map((d) => ({ ...d, symbol: d.meta?.tags?.[0] ?? d.title.split(' ')[0] }))
-        .sort((a, b) => new Date(b.meta?.publishedOn).getTime() - new Date(a.meta?.publishedOn).getTime()),
-    ),
-)
+const { data: articles } = await useResearchArticles('research-index')
 </script>
 
 <template>
