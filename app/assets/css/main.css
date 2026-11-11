@@ -92,6 +92,10 @@
     @apply bg-background text-foreground font-sans antialiased;
     font-feature-settings: 'tnum' 1, 'cv11' 1;
   }
+  /* Room for the mobile tab bar in AppHeader.vue */
+  @media (max-width: 639px) {
+    body { padding-bottom: calc(3.5rem + env(safe-area-inset-bottom)); }
+  }
   h1, h2, h3 {
     text-wrap: balance;
   }

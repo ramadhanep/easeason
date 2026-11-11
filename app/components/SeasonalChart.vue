@@ -4,7 +4,7 @@ import VChart from 'vue-echarts'
 import { useElementSize } from '@vueuse/core'
 import { ArrowRight } from '@lucide/vue'
 import { use } from 'echarts/core'
-import { monthLabel, type SeasonalProfile, type LatestSeason, type CurrentYear } from '#shared/seasonal'
+import { monthLabel, computeStats, type SeasonalProfile, type LatestSeason, type CurrentYear } from '#shared/seasonal'
 import { CanvasRenderer } from 'echarts/renderers'
 import { LineChart, EffectScatterChart } from 'echarts/charts'
 import {
@@ -95,6 +95,16 @@ function exportPng() {
 }
 
 defineExpose({ exportPng, setZoom, resetZoom })
+
+// Text alternative for the canvas chart: the main profile's shape in one sentence.
+const ariaLabel = computed(() => {
+  const p = props.profiles.find((x) => x.id === props.seasonFilter) ?? props.profiles[0]
+  if (!p?.points.length) return 'Seasonal performance chart.'
+  const s = computeStats(p.label, p.points)
+  const at = (v: number) => monthLabel(p.points.find((pt) => pt.pct === v)!.day)
+  const pct = (v: number) => `${v >= 0 ? '+' : ''}${v.toFixed(1)}%`
+  return `${p.label} seasonal path for ${props.symbol}: ends at ${pct(s.end)}, high ${pct(s.best)} around ${at(s.best)}, low ${pct(s.worst)} around ${at(s.worst)}. Full numbers in the Statistics view.`
+})
 
 const emit = defineEmits<{ viewDetail: [id: string] }>()
 const wrapRef = ref<HTMLElement | null>(null)
@@ -467,7 +477,7 @@ const option = computed(() => {
       :option="option"
       autoresize
       role="img"
-      aria-label="Seasonal performance chart. Toggle profiles from the legend."
+      :aria-label="ariaLabel"
       class="h-full w-full"
     />
     <div
