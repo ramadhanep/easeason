@@ -9,9 +9,11 @@ const { data, pending, error } = await useFetch('/api/seasonal', {
   watch: [symbol],
 })
 
-const defaultTab = data.value?.profiles.some((p) => p.id === 'full-seasons') ? 'full-seasons' : 'all-years'
+const defaultTab = computed(() => data.value?.profiles.some((p) => p.id === 'full-seasons') ? 'full-seasons' : 'all-years')
 const queryTab = route.query.tab as string | undefined
-const seasonTab = ref(queryTab && data.value?.profiles.some((p) => p.id === queryTab) ? queryTab : defaultTab)
+const seasonTab = ref(queryTab && data.value?.profiles.some((p) => p.id === queryTab) ? queryTab : defaultTab.value)
+// Symbol change reuses this page instance: reset to the new asset's default tab.
+watch(() => data.value?.meta.symbol, () => { seasonTab.value = defaultTab.value })
 const horizonDays = computed(() => seasonTab.value === 'full-seasons' ? 1461 : 365)
 const view = ref<'chart' | 'stats' | 'animate'>('chart')
 const VIEW_TABS = [{ id: 'chart', label: 'Chart' }, { id: 'stats', label: 'Statistics' }, { id: 'animate', label: 'Animate' }]
@@ -111,7 +113,7 @@ const trumpEnabled = ref(route.query.trump === '1' && !!data.value?.profiles.som
 // Keep tab + trump toggle in the URL so a chart state can be shared.
 watch([seasonTab, trumpEnabled], ([tab, trump]) => {
   navigateTo({
-    query: { ...route.query, tab: tab === defaultTab ? undefined : tab, trump: trump ? '1' : undefined },
+    query: { ...route.query, tab: tab === defaultTab.value ? undefined : tab, trump: trump ? '1' : undefined },
     replace: true,
   })
 })
@@ -173,8 +175,14 @@ const backLabel = computed(() => (backTo.value === '/explore' ? 'Explore' : 'Hom
         <div class="mb-4 inline-flex size-12 items-center justify-center rounded-full border bg-muted/40">
           <CloudOff class="size-5 text-muted-foreground" />
         </div>
-        <h2 class="mb-2 text-lg font-medium">Unable to load market data</h2>
-        <p class="text-sm text-muted-foreground">Yahoo Finance may be temporarily unavailable. Please try again later.</p>
+        <template v-if="error.statusCode === 404">
+          <h2 class="mb-2 text-lg font-medium">Asset not found</h2>
+          <p class="text-sm text-muted-foreground">"{{ symbol }}" is not in the supported asset list.</p>
+        </template>
+        <template v-else>
+          <h2 class="mb-2 text-lg font-medium">Unable to load market data</h2>
+          <p class="text-sm text-muted-foreground">Yahoo Finance may be temporarily unavailable. Please try again later.</p>
+        </template>
         <Button variant="outline" size="sm" class="mt-6 gap-1.5" @click="navigateTo('/')">
           <ArrowLeft class="size-4" /> Back home
         </Button>

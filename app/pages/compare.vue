@@ -133,7 +133,7 @@ const failed = computed(() => symbols.value.filter((s) => results.value[s] === '
 
       <div v-if="!symbols.length" class="surface mt-8 flex flex-col items-center gap-2 py-24 text-center text-muted-foreground">
         <Plus class="size-6" />
-        <p class="text-sm">Add at least two assets to compare their seasonality.</p>
+        <p class="text-sm">Add assets to compare their seasonality.</p>
       </div>
 
       <template v-else>

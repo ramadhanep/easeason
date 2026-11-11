@@ -74,7 +74,7 @@ export function profileDescription(id: string): string {
 export function monthLabel(doy: number): string {
   const d = new Date(Date.UTC(2020, 0, 0))
   d.setUTCDate(d.getUTCDate() + doy)
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })
 }
 
 function fmtNum(n?: number): string {

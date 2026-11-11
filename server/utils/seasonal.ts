@@ -26,7 +26,7 @@ const MIN_DAYS = 200
 export { getElectionCycleLabel }
 
 function toPriceRow(r: Row): PriceRow {
-  const year = r.date.getFullYear()
+  const year = r.date.getUTCFullYear()
   const start = Date.UTC(year, 0, 0)
   const doy = Math.floor((r.date.getTime() - start) / 86400000)
   return { year, doy, price: r.adjclose }
@@ -58,10 +58,10 @@ export async function fetchHistoricalData(symbol: string): Promise<Row[]> {
 function stripIncompleteYears(rows: Row[]): Row[] {
   const byYear = new Map<number, number>()
   for (const r of rows) {
-    const y = r.date.getFullYear()
+    const y = r.date.getUTCFullYear()
     byYear.set(y, (byYear.get(y) ?? 0) + 1)
   }
-  return rows.filter((r) => (byYear.get(r.date.getFullYear()) ?? 0) >= MIN_DAYS)
+  return rows.filter((r) => (byYear.get(r.date.getUTCFullYear()) ?? 0) >= MIN_DAYS)
 }
 
 export interface SeasonalProfile {
@@ -88,9 +88,9 @@ export interface SeasonalResponse {
 }
 
 export function computeSeasonal(symbol: string, rows: Row[], now = new Date()): SeasonalResponse {
-  const currentYear = now.getFullYear()
-  const hist = stripIncompleteYears(rows.filter((r) => r.date.getFullYear() < currentYear))
-  const current = rows.filter((r) => r.date.getFullYear() === currentYear)
+  const currentYear = now.getUTCFullYear()
+  const hist = stripIncompleteYears(rows.filter((r) => r.date.getUTCFullYear() < currentYear))
+  const current = rows.filter((r) => r.date.getUTCFullYear() === currentYear)
 
   const histReturns = calculateDailyReturns(hist.map(toPriceRow))
   const cvReturns = calculateDailyReturns(current.map(toPriceRow))

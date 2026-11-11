@@ -24,11 +24,6 @@ interface SeasonalPoint {
   factor: number
 }
 
-export interface SeasonFilter {
-  id: string
-  label: string
-}
-
 interface SeasonalProfile {
   id: string
   label: string
@@ -236,7 +231,7 @@ function blendToLuminance(hex: string, target: number): string {
 const monthAxisLabel = (v: number) => {
   const d = new Date(Date.UTC(2020, 0, 0))
   d.setUTCDate(d.getUTCDate() + v)
-  return d.toLocaleString('en-US', { month: 'short' })
+  return d.toLocaleString('en-US', { month: 'short', timeZone: 'UTC' })
 }
 
 const PHASE_META = [
@@ -246,7 +241,7 @@ const PHASE_META = [
   { id: 'pre-election', name: 'Pre-Election', color: '#10b981' },
 ]
 const BOX_BOUNDS = [[1, 365], [366, 730], [731, 1095], [1096, 1461]] as const
-// Boxes rotate with the year so the current year always sits in the third box.
+// Boxes rotate with the year so the current year always sits in the last box.
 const fullSeasonPhases = computed(() =>
   BOX_BOUNDS.map(([from, to], i) => ({ ...PHASE_META[(props.startPhase + i) % 4]!, from, to })),
 )
