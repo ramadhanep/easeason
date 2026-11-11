@@ -130,3 +130,39 @@ export function buildMonthlyReturns(returns: RetRow[]): MonthlyRow[] {
   }
   return [...byYear.entries()].sort((a, b) => a[0] - b[0]).map(([year, months]) => ({ year, months }))
 }
+
+export type ForwardWindow = {
+  fromDay: number
+  toDay: number
+  avg: number
+  median: number
+  best: number
+  worst: number
+  wins: number
+  years: number
+}
+
+// Per-year compounded return (%) from fromDoy (exclusive) to fromDoy + days, within each calendar year.
+// ponytail: window is clamped at Dec 31 rather than wrapping into the next year; late-December starts get a shorter window.
+export function buildForwardWindow(returns: RetRow[], fromDoy: number, days = 30): ForwardWindow | undefined {
+  const toDoy = Math.min(fromDoy + days, 366)
+  const byYear = new Map<number, number>()
+  for (const r of returns) {
+    if (r.doy <= fromDoy || r.doy > toDoy) continue
+    byYear.set(r.year, (byYear.get(r.year) ?? 1) * (1 + r.ret))
+  }
+  const vals = [...byYear.values()].map((f) => (f - 1) * 100)
+  if (!vals.length) return undefined
+  const sorted = [...vals].sort((a, b) => a - b)
+  const mid = Math.floor(sorted.length / 2)
+  return {
+    fromDay: fromDoy,
+    toDay: toDoy,
+    avg: vals.reduce((a, b) => a + b, 0) / vals.length,
+    median: sorted.length % 2 ? sorted[mid]! : (sorted[mid - 1]! + sorted[mid]!) / 2,
+    best: sorted.at(-1)!,
+    worst: sorted[0]!,
+    wins: vals.filter((v) => v > 0).length,
+    years: vals.length,
+  }
+}

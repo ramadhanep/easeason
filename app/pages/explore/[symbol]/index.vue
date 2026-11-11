@@ -89,6 +89,10 @@ useHead({
 
 const fmt = fmtNum
 
+// Only remember symbols that actually loaded (not 404s).
+const { track } = useRecentSymbols()
+watch(() => data.value?.meta.symbol, (s) => { if (s && import.meta.client) track(s) }, { immediate: true })
+
 const totalProfiles = computed(() => data.value?.profiles?.length ?? 0)
 
 const SEASON_TABS: Array<{ id: string; label: string }> = [
@@ -335,6 +339,24 @@ const backLabel = computed(() => (backTo.value === '/explore' ? 'Explore' : 'Hom
             <p class="text-xs text-muted-foreground">Days positive</p>
             <p class="mt-1 font-mono text-xl font-semibold tabular-nums">{{ activeStats.winRate.toFixed(0) }}%</p>
           </div>
+        </section>
+
+        <!-- Today in season: historical return over the next ~30 days from today -->
+        <section v-if="data.forward" class="surface mt-3 flex flex-wrap items-center gap-x-8 gap-y-3 p-4" aria-label="Next 30 days historically">
+          <div class="min-w-0">
+            <p class="text-xs text-muted-foreground">Today in season · {{ data.forward.fromLabel }} → {{ data.forward.toLabel }}</p>
+            <p class="mt-1 text-sm">
+              Historically
+              <span class="font-mono font-semibold tabular-nums" :class="data.forward.avg >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'">{{ signed(data.forward.avg) }}</span>
+              on average, up in
+              <span class="font-semibold tabular-nums">{{ data.forward.wins }} of {{ data.forward.years }}</span> years.
+            </p>
+          </div>
+          <dl class="ml-auto flex gap-6 font-mono text-sm tabular-nums">
+            <div><dt class="text-xs font-sans text-muted-foreground">Median</dt><dd>{{ signed(data.forward.median) }}</dd></div>
+            <div><dt class="text-xs font-sans text-muted-foreground">Best</dt><dd class="text-emerald-600 dark:text-emerald-400">{{ signed(data.forward.best) }}</dd></div>
+            <div><dt class="text-xs font-sans text-muted-foreground">Worst</dt><dd class="text-red-600 dark:text-red-400">{{ signed(data.forward.worst) }}</dd></div>
+          </dl>
         </section>
 
         <!-- Monthly heatmap -->

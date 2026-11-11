@@ -10,6 +10,7 @@ import {
   buildCurrentYearProfile,
   buildLatestSeasons,
   buildMonthlyReturns,
+  buildForwardWindow,
   type MonthlyRow,
   type LatestSeason,
   type PriceRow,
@@ -145,8 +146,17 @@ export function computeSeasonal(symbol: string, rows: Row[], now = new Date()): 
     currentYear: currentPoints.length ? { year: currentYear, points: currentPoints } : undefined,
     fullSeasonStart: fullSeasonStartPhase(currentYear),
     monthly: buildMonthlyReturns([...histReturns, ...cvReturns]),
+    forward: forwardWithLabels(histReturns, now),
     latestSeasons: buildLatestSeasons(calculateDailyReturns(rows.map(toPriceRow)), currentYear),
   }
+}
+
+// Labels use the current year's calendar (monthLabel assumes a leap year, off by one from March).
+function forwardWithLabels(returns: Parameters<typeof buildForwardWindow>[0], now: Date) {
+  const w = buildForwardWindow(returns, toPriceRow({ date: now, adjclose: 0 }).doy)
+  if (!w) return undefined
+  const label = (doy: number) => new Date(Date.UTC(now.getUTCFullYear(), 0, doy)).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })
+  return { ...w, fromLabel: label(w.fromDay), toLabel: label(w.toDay) }
 }
 
 const CACHE_TTL_MS = 30 * 60 * 1000

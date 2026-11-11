@@ -7,6 +7,7 @@ import {
   buildLatestSeasons,
   fullSeasonStartPhase,
   TRUMP_YEARS,
+  buildForwardWindow,
 } from '../server/utils/math'
 import type { PriceRow } from '../server/utils/math'
 
@@ -139,5 +140,30 @@ describe('monthly returns', () => {
     expect(rows[0]!.months[0]).toBeCloseTo(21)
     expect(rows[0]!.months[1]).toBeCloseTo(-50)
     expect(rows[0]!.months[2]).toBeNull()
+  })
+})
+
+describe('buildForwardWindow', () => {
+  const rows = [
+    // 2020: +10% then +10% inside window, outside-window day ignored
+    { year: 2020, doy: 10, ret: 0.5 },
+    { year: 2020, doy: 11, ret: 0.1 },
+    { year: 2020, doy: 40, ret: 0.1 },
+    // 2021: -5% inside window
+    { year: 2021, doy: 25, ret: -0.05 },
+  ]
+
+  it('compounds each year over the window and counts wins', () => {
+    const w = buildForwardWindow(rows, 10, 30)!
+    expect(w.toDay).toBe(40)
+    expect(w.years).toBe(2)
+    expect(w.wins).toBe(1)
+    expect(w.best).toBeCloseTo(21, 6)
+    expect(w.worst).toBeCloseTo(-5, 6)
+    expect(w.avg).toBeCloseTo(8, 6)
+  })
+
+  it('clamps at year end and returns undefined with no data', () => {
+    expect(buildForwardWindow(rows, 350, 30)).toBeUndefined()
   })
 })

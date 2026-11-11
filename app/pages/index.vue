@@ -9,6 +9,8 @@ const groupedSymbols = computed(() => Object.values(groups.value ?? {}).filter((
 
 const popular = ['^GSPC', '^IXIC', 'SPY', 'QQQ', 'BTC-USD', 'AAPL', 'NVDA', 'MSFT', 'AMZN', 'GOOGL', 'META', 'TSLA', 'AVGO', 'MU', 'SNDK', 'WMT', 'JPM', 'AMD', 'TSM', 'COIN', 'BBCA.JK', 'ETH-USD', 'SOL-USD', 'BNB-USD']
 
+const { recent } = useRecentSymbols()
+
 const totalAssets = computed(() => groupedSymbols.value.reduce((n, g) => n + g.items.length, 0))
 
 const nameFor = (symbol: string) => {
@@ -47,6 +49,17 @@ const nameFor = (symbol: string) => {
       </section>
 
       <div class="mx-auto max-w-6xl space-y-16 px-4 py-14">
+        <ClientOnly>
+          <section v-if="recent.length">
+            <div class="mb-5 flex items-end justify-between">
+              <h2 class="text-xl font-semibold tracking-tight">Recently viewed</h2>
+              <button type="button" class="cursor-pointer text-sm text-muted-foreground transition-colors hover:text-foreground" @click="recent = []">Clear</button>
+            </div>
+            <div class="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <AssetTile v-for="sym in recent" :key="sym" :symbol="sym" :name="nameFor(sym)" />
+            </div>
+          </section>
+        </ClientOnly>
         <section>
           <div class="mb-5 flex items-end justify-between">
             <div>

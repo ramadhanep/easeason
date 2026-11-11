@@ -39,6 +39,8 @@ export interface SeasonalData {
   fullSeasonStart?: number
   monthly?: Array<{ year: number; months: Array<number | null> }>
   latestSeasons?: LatestSeason[]
+  /** Historical returns over the next ~30 days from today's day-of-year. */
+  forward?: { fromDay: number; toDay: number; avg: number; median: number; best: number; worst: number; wins: number; years: number; fromLabel: string; toLabel: string }
 }
 
 export interface ProfileStats {
