@@ -38,6 +38,10 @@ watch(symbols, async (syms) => {
 function add(s: string) {
   if (!symbols.value.includes(s) && symbols.value.length < MAX) symbols.value = [...symbols.value, s]
 }
+function retry() {
+  results.value = Object.fromEntries(Object.entries(results.value).filter(([, r]) => r !== 'error'))
+  symbols.value = [...symbols.value] // re-trigger the fetch watcher
+}
 function remove(s: string) { symbols.value = symbols.value.filter((x) => x !== s) }
 
 const FALLBACK = ['#3b82f6', '#f59e0b', '#10b981']
@@ -117,7 +121,7 @@ const failed = computed(() => symbols.value.filter((s) => results.value[s] === '
             <X class="size-3.5" />
           </button>
         </span>
-        <div v-if="symbols.length < MAX" class="w-64">
+        <div v-if="symbols.length < MAX" class="w-full sm:w-64">
           <SymbolSearch pick :placeholder="symbols.length ? 'Add asset…' : 'Pick an asset…'" @select="add" />
         </div>
         <div class="ml-auto">
@@ -129,11 +133,14 @@ const failed = computed(() => symbols.value.filter((s) => results.value[s] === '
         </div>
       </div>
 
-      <p v-if="failed.length" class="mt-4 text-sm text-destructive">Could not load {{ failed.join(', ') }}.</p>
+      <p v-if="failed.length" class="mt-4 flex items-center gap-2 text-sm text-destructive">
+        Could not load {{ failed.join(', ') }}.
+        <Button variant="outline" size="sm" :disabled="loading" @click="retry">Retry</Button>
+      </p>
 
       <div v-if="!symbols.length" class="surface mt-8 flex flex-col items-center gap-2 py-24 text-center text-muted-foreground">
         <Plus class="size-6" />
-        <p class="text-sm">Add at least two assets to compare their seasonality.</p>
+        <p class="text-sm">Add assets to compare their seasonality.</p>
       </div>
 
       <template v-else>

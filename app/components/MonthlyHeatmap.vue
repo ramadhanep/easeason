@@ -43,13 +43,13 @@ const f = (v: number | null, d = 1) => (v == null ? '' : `${v > 0 ? '+' : ''}${v
     <table class="w-full min-w-[720px] border-separate border-spacing-[3px] text-xs tabular-nums">
       <thead>
         <tr class="text-muted-foreground">
-          <th class="w-14 text-left font-medium" />
+          <th class="sticky left-0 z-10 w-14 bg-card text-left font-medium" />
           <th v-for="(m, i) in MONTHS" :key="m" class="py-1 text-center font-medium" :class="i === bestMonth ? 'text-foreground' : ''">{{ m }}</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="r in rows" :key="r.year">
-          <th class="pr-2 text-left font-mono font-medium text-muted-foreground">{{ r.year }}</th>
+          <th class="sticky left-0 z-10 bg-card pr-2 text-left font-mono font-medium text-muted-foreground">{{ r.year }}</th>
           <td
             v-for="(v, m) in r.months"
             :key="m"
@@ -63,7 +63,7 @@ const f = (v: number | null, d = 1) => (v == null ? '' : `${v > 0 ? '+' : ''}${v
         </tr>
         <tr><td :colspan="13" class="h-2" /></tr>
         <tr v-for="[label, key] in ([['Avg %', 'avg'], ['Median %', 'median'], ['Win rate', 'win']] as const)" :key="key">
-          <th class="pr-2 text-left font-medium text-muted-foreground">{{ label }}</th>
+          <th class="sticky left-0 z-10 bg-card pr-2 text-left font-medium text-muted-foreground">{{ label }}</th>
           <td
             v-for="(s, m) in summary"
             :key="m"

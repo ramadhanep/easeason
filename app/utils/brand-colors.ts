@@ -195,10 +195,6 @@ export const BRAND_COLORS: Record<string, string> = {
   'MTEL.JK': '#0072CE',
 };
 
-export function brandColorFor(symbol: string): string | undefined {
-  return BRAND_COLORS[symbol]
-}
-
 export function brandTextColor(hex: string): string {
   const c = hex.replace('#', '')
   const r = parseInt(c.slice(0, 2), 16)

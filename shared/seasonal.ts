@@ -20,13 +20,27 @@ export interface SeasonalMeta {
   currentYear: number
 }
 
+export interface CurrentYear {
+  year: number
+  points: SeasonalPoint[]
+}
+
+export interface LatestSeason {
+  id: string
+  label: string
+  year: number
+  points: SeasonalPoint[]
+}
+
 export interface SeasonalData {
   meta: SeasonalMeta
   profiles: SeasonalProfile[]
-  currentYear?: { year: number; points: SeasonalPoint[] }
+  currentYear?: CurrentYear
   fullSeasonStart?: number
   monthly?: Array<{ year: number; months: Array<number | null> }>
-  latestSeasons?: Array<{ id: string; label: string; year: number; points: SeasonalPoint[] }>
+  latestSeasons?: LatestSeason[]
+  /** Historical returns over the next ~30 days from today's day-of-year. */
+  forward?: { fromDay: number; toDay: number; avg: number; median: number; best: number; worst: number; wins: number; years: number; fromLabel: string; toLabel: string }
 }
 
 export interface ProfileStats {
@@ -74,10 +88,10 @@ export function profileDescription(id: string): string {
 export function monthLabel(doy: number): string {
   const d = new Date(Date.UTC(2020, 0, 0))
   d.setUTCDate(d.getUTCDate() + doy)
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })
 }
 
-function fmtNum(n?: number): string {
+export function fmtNum(n?: number): string {
   if (n == null || !Number.isFinite(n)) return '—'
   return Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(n)
 }
@@ -125,21 +139,11 @@ export function buildSeasonalMarkdown(data: SeasonalData): string {
   lines.push('| Profile | Avg % | Median % | Std Dev | Win Rate | Best | Worst | Year-end |')
   lines.push('|---|---|---|---|---|---|---|---|')
   for (const p of profiles) {
-    const vals = p.points.map((pt) => pt.pct)
-    const n = vals.length
-    if (n === 0) {
+    if (!p.points.length) {
       lines.push(`| ${p.label} | — | — | — | — | — | — | — |`)
       continue
     }
-    const avg = vals.reduce((a, b) => a + b, 0) / n
-    const sorted = [...vals].sort((a, b) => a - b)
-    const mid = Math.floor(n / 2)
-    const median = n % 2 ? sorted[mid]! : (sorted[mid - 1]! + sorted[mid]!) / 2
-    const std = Math.sqrt(vals.reduce((a, b) => a + (b - avg) ** 2, 0) / n)
-    const winRate = (vals.filter((v) => v > 0).length / n) * 100
-    const best = Math.max(...vals)
-    const worst = Math.min(...vals)
-    const end = vals[n - 1]!
+    const { avg, median, std, winRate, best, worst, end } = computeStats(p.label, p.points)
     lines.push(`| ${p.label} | ${avg.toFixed(2)}% | ${median.toFixed(2)}% | ${std.toFixed(2)} | ${winRate.toFixed(0)}% | ${best.toFixed(2)}% | ${worst.toFixed(2)}% | ${end.toFixed(2)}% |`)
   }
   lines.push('')

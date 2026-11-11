@@ -18,7 +18,7 @@ defineProps<{
       <h3 class="font-semibold leading-snug tracking-tight">{{ article.title }}</h3>
       <p v-if="article.description" class="mt-2 line-clamp-2 text-sm text-muted-foreground">{{ article.description }}</p>
       <div class="mt-auto flex items-center justify-between pt-4 text-xs text-muted-foreground">
-        <span v-if="article.meta?.publishedOn">{{ new Date(article.meta.publishedOn).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) }}</span>
+        <span v-if="article.meta?.publishedOn">{{ new Date(article.meta.publishedOn).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' }) }}</span>
         <span class="inline-flex items-center gap-1 font-medium text-foreground">Read <ArrowRight class="size-3.5 transition-transform group-hover:translate-x-0.5" /></span>
       </div>
     </div>

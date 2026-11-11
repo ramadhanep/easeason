@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ArrowLeft, GitCompareArrows, Download, CloudOff, FileText, Play, Pause } from '@lucide/vue'
-import { computeStats, profileDescription, type ProfileStats } from '#shared/seasonal'
+import { computeStats, fmtNum, profileDescription, type ProfileStats } from '#shared/seasonal'
 const route = useRoute()
 const symbol = computed(() => route.params.symbol as string)
 
@@ -9,9 +9,11 @@ const { data, pending, error } = await useFetch('/api/seasonal', {
   watch: [symbol],
 })
 
-const defaultTab = data.value?.profiles.some((p) => p.id === 'full-seasons') ? 'full-seasons' : 'all-years'
+const defaultTab = computed(() => data.value?.profiles.some((p) => p.id === 'full-seasons') ? 'full-seasons' : 'all-years')
 const queryTab = route.query.tab as string | undefined
-const seasonTab = ref(queryTab && data.value?.profiles.some((p) => p.id === queryTab) ? queryTab : defaultTab)
+const seasonTab = ref(queryTab && data.value?.profiles.some((p) => p.id === queryTab) ? queryTab : defaultTab.value)
+// Symbol change reuses this page instance: reset to the new asset's default tab.
+watch(() => data.value?.meta.symbol, () => { seasonTab.value = defaultTab.value })
 const horizonDays = computed(() => seasonTab.value === 'full-seasons' ? 1461 : 365)
 const view = ref<'chart' | 'stats' | 'animate'>('chart')
 const VIEW_TABS = [{ id: 'chart', label: 'Chart' }, { id: 'stats', label: 'Statistics' }, { id: 'animate', label: 'Animate' }]
@@ -85,10 +87,11 @@ useHead({
   }),
 })
 
-const fmt = (n: number | undefined): string => {
-  if (n == null || !Number.isFinite(n)) return '—'
-  return Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(n)
-}
+const fmt = fmtNum
+
+// Only remember symbols that actually loaded (not 404s).
+const { track } = useRecentSymbols()
+watch(() => data.value?.meta.symbol, (s) => { if (s && import.meta.client) track(s) }, { immediate: true })
 
 const totalProfiles = computed(() => data.value?.profiles?.length ?? 0)
 
@@ -111,7 +114,7 @@ const trumpEnabled = ref(route.query.trump === '1' && !!data.value?.profiles.som
 // Keep tab + trump toggle in the URL so a chart state can be shared.
 watch([seasonTab, trumpEnabled], ([tab, trump]) => {
   navigateTo({
-    query: { ...route.query, tab: tab === defaultTab ? undefined : tab, trump: trump ? '1' : undefined },
+    query: { ...route.query, tab: tab === defaultTab.value ? undefined : tab, trump: trump ? '1' : undefined },
     replace: true,
   })
 })
@@ -126,18 +129,7 @@ const activeStats = computed(() => {
 })
 const signed = (n: number) => `${n >= 0 ? '+' : ''}${fmt(n)}%`
 
-const { data: relatedArticles } = await useAsyncData(`related-${symbol.value}`, () =>
-  queryCollection('research')
-    .select('title', 'description', 'meta', 'path')
-    .all()
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .then((docs: any[]) =>
-      docs
-        .map((d) => ({ ...d, symbol: d.meta?.tags?.[0] ?? d.title.split(' ')[0] }))
-        .filter((a) => a.meta?.tags?.some((t: string) => t.toUpperCase() === symbol.value.toUpperCase()))
-        .sort((a, b) => new Date(b.meta?.publishedOn).getTime() - new Date(a.meta?.publishedOn).getTime()),
-    ),
-)
+const { data: relatedArticles } = await useResearchArticles(`related-${symbol.value}`, symbol.value)
 
 const bg = computed(() => BRAND_COLORS[symbol.value])
 const fg = computed(() => {
@@ -173,8 +165,14 @@ const backLabel = computed(() => (backTo.value === '/explore' ? 'Explore' : 'Hom
         <div class="mb-4 inline-flex size-12 items-center justify-center rounded-full border bg-muted/40">
           <CloudOff class="size-5 text-muted-foreground" />
         </div>
-        <h2 class="mb-2 text-lg font-medium">Unable to load market data</h2>
-        <p class="text-sm text-muted-foreground">Yahoo Finance may be temporarily unavailable. Please try again later.</p>
+        <template v-if="error.statusCode === 404">
+          <h2 class="mb-2 text-lg font-medium">Asset not found</h2>
+          <p class="text-sm text-muted-foreground">"{{ symbol }}" is not in the supported asset list.</p>
+        </template>
+        <template v-else>
+          <h2 class="mb-2 text-lg font-medium">Unable to load market data</h2>
+          <p class="text-sm text-muted-foreground">Yahoo Finance may be temporarily unavailable. Please try again later.</p>
+        </template>
         <Button variant="outline" size="sm" class="mt-6 gap-1.5" @click="navigateTo('/')">
           <ArrowLeft class="size-4" /> Back home
         </Button>
@@ -341,6 +339,24 @@ const backLabel = computed(() => (backTo.value === '/explore' ? 'Explore' : 'Hom
             <p class="text-xs text-muted-foreground">Days positive</p>
             <p class="mt-1 font-mono text-xl font-semibold tabular-nums">{{ activeStats.winRate.toFixed(0) }}%</p>
           </div>
+        </section>
+
+        <!-- Today in season: historical return over the next ~30 days from today -->
+        <section v-if="data.forward" class="surface mt-3 flex flex-wrap items-center gap-x-8 gap-y-3 p-4" aria-label="Next 30 days historically">
+          <div class="min-w-0">
+            <p class="text-xs text-muted-foreground">Today in season · {{ data.forward.fromLabel }} → {{ data.forward.toLabel }}</p>
+            <p class="mt-1 text-sm">
+              Historically
+              <span class="font-mono font-semibold tabular-nums" :class="data.forward.avg >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'">{{ signed(data.forward.avg) }}</span>
+              on average, up in
+              <span class="font-semibold tabular-nums">{{ data.forward.wins }} of {{ data.forward.years }}</span> years.
+            </p>
+          </div>
+          <dl class="ml-auto flex gap-6 font-mono text-sm tabular-nums">
+            <div><dt class="text-xs font-sans text-muted-foreground">Median</dt><dd>{{ signed(data.forward.median) }}</dd></div>
+            <div><dt class="text-xs font-sans text-muted-foreground">Best</dt><dd class="text-emerald-600 dark:text-emerald-400">{{ signed(data.forward.best) }}</dd></div>
+            <div><dt class="text-xs font-sans text-muted-foreground">Worst</dt><dd class="text-red-600 dark:text-red-400">{{ signed(data.forward.worst) }}</dd></div>
+          </dl>
         </section>
 
         <!-- Monthly heatmap -->

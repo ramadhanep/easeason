@@ -4,7 +4,7 @@ import VChart from 'vue-echarts'
 import { useElementSize } from '@vueuse/core'
 import { ArrowRight } from '@lucide/vue'
 import { use } from 'echarts/core'
-import { monthLabel } from '#shared/seasonal'
+import { monthLabel, computeStats, type SeasonalProfile, type LatestSeason, type CurrentYear } from '#shared/seasonal'
 import { CanvasRenderer } from 'echarts/renderers'
 import { LineChart, EffectScatterChart } from 'echarts/charts'
 import {
@@ -17,36 +17,6 @@ import {
 } from 'echarts/components'
 
 use([CanvasRenderer, LineChart, EffectScatterChart, GridComponent, TooltipComponent, LegendComponent, DataZoomComponent, MarkAreaComponent, MarkLineComponent])
-
-interface SeasonalPoint {
-  day: number
-  pct: number
-  factor: number
-}
-
-export interface SeasonFilter {
-  id: string
-  label: string
-}
-
-interface SeasonalProfile {
-  id: string
-  label: string
-  years: number[]
-  points: SeasonalPoint[]
-}
-
-interface LatestSeason {
-  id: string
-  label: string
-  year: number
-  points: SeasonalPoint[]
-}
-
-interface CurrentYear {
-  year: number
-  points: SeasonalPoint[]
-}
 
 const props = withDefaults(
   defineProps<{
@@ -125,6 +95,16 @@ function exportPng() {
 }
 
 defineExpose({ exportPng, setZoom, resetZoom })
+
+// Text alternative for the canvas chart: the main profile's shape in one sentence.
+const ariaLabel = computed(() => {
+  const p = props.profiles.find((x) => x.id === props.seasonFilter) ?? props.profiles[0]
+  if (!p?.points.length) return 'Seasonal performance chart.'
+  const s = computeStats(p.label, p.points)
+  const at = (v: number) => monthLabel(p.points.find((pt) => pt.pct === v)!.day)
+  const pct = (v: number) => `${v >= 0 ? '+' : ''}${v.toFixed(1)}%`
+  return `${p.label} seasonal path for ${props.symbol}: ends at ${pct(s.end)}, high ${pct(s.best)} around ${at(s.best)}, low ${pct(s.worst)} around ${at(s.worst)}. Full numbers in the Statistics view.`
+})
 
 const emit = defineEmits<{ viewDetail: [id: string] }>()
 const wrapRef = ref<HTMLElement | null>(null)
@@ -236,7 +216,7 @@ function blendToLuminance(hex: string, target: number): string {
 const monthAxisLabel = (v: number) => {
   const d = new Date(Date.UTC(2020, 0, 0))
   d.setUTCDate(d.getUTCDate() + v)
-  return d.toLocaleString('en-US', { month: 'short' })
+  return d.toLocaleString('en-US', { month: 'short', timeZone: 'UTC' })
 }
 
 const PHASE_META = [
@@ -246,13 +226,15 @@ const PHASE_META = [
   { id: 'pre-election', name: 'Pre-Election', color: '#10b981' },
 ]
 const BOX_BOUNDS = [[1, 365], [366, 730], [731, 1095], [1096, 1461]] as const
-// Boxes rotate with the year so the current year always sits in the third box.
+// Boxes rotate with the year so the current year always sits in the last box.
 const fullSeasonPhases = computed(() =>
   BOX_BOUNDS.map(([from, to], i) => ({ ...PHASE_META[(props.startPhase + i) % 4]!, from, to })),
 )
 const FULL_SEASON_LABEL_DAYS = BOX_BOUNDS.map(([from, to]) => Math.round((from + to) / 2))
 
-const option = computed(() => {
+// Static chart (lines, axes, legend). Kept separate from the hover/animation dots so
+// per-frame updates of effectiveDay don't rebuild every series' data arrays.
+const base = computed(() => {
   const textColor = props.isDark ? '#e5e9f0' : '#374151'
   const gridColor = props.isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'
   const tooltipBg = props.isDark ? 'rgba(17,24,39,0.95)' : 'rgba(255,255,255,0.95)'
@@ -357,53 +339,7 @@ const option = computed(() => {
     })
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const overlaySeries: any[] = []
-  if (effectiveDay.value != null) {
-    const target = effectiveDay.value
-    const resting = props.activeDay == null && hoverDay.value == null
-    allSeries.forEach((s) => {
-      const pts = s.data as Array<[number, number]>
-      const range = yearRange.get(s.name)
-      const hidden = range && !resting && (target < range[0] || target > range[1])
-      const hit = hidden ? undefined : (pts.find((p) => p[0] === target) ?? [...pts].reverse().find((p) => p[0] <= target))
-      const color = s.itemStyle.color as string
-      overlaySeries.push({
-        id: `dot:${s.name}`,
-        name: s.name,
-        type: 'effectScatter',
-        symbol: 'circle',
-        symbolSize: 4,
-        rippleEffect: { brushType: 'stroke', scale: 6, period: 3 },
-        itemStyle: { color },
-        animationDurationUpdate: 0,
-        labelLayout: { moveOverlap: 'shiftY' },
-        tooltip: { show: false },
-        label: {
-          show: true,
-          position: 'left',
-          align: 'right',
-          verticalAlign: 'middle',
-          distance: 8,
-          color: props.isDark ? '#111827' : '#fff',
-          backgroundColor: color,
-          borderRadius: 4,
-          padding: [2, 6],
-          fontSize: 10,
-          fontWeight: 600,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          formatter: (params: any) => {
-            const val = params.value[1];
-            return (val >= 0 ? '+' : '') + val.toFixed(1) + '%';
-          },
-        },
-        zlevel: 1,
-        data: hit ? [{ name: s.name, value: [hit[0], hit[1]] }] : [],
-      })
-    })
-  }
-
-  return {
+  const option = {
     backgroundColor: 'transparent',
     animationDurationUpdate: 0,
     tooltip: {
@@ -471,8 +407,60 @@ const option = computed(() => {
       splitLine: { lineStyle: { color: gridColor } },
       axisLine: { show: true, lineStyle: { color: gridColor, width: 1 } },
     },
-    series: [...allSeries.map((s) => ({ ...s, id: `line:${s.name}` })), ...overlaySeries],
+    series: allSeries.map((s) => ({ ...s, id: `line:${s.name}` })),
   }
+  return { option, allSeries, yearRange }
+})
+
+const option = computed(() => {
+  const { option, allSeries, yearRange } = base.value
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const overlaySeries: any[] = []
+  if (effectiveDay.value != null) {
+    const target = effectiveDay.value
+    const resting = props.activeDay == null && hoverDay.value == null
+    allSeries.forEach((s) => {
+      const pts = s.data as Array<[number, number]>
+      const range = yearRange.get(s.name)
+      const hidden = range && !resting && (target < range[0] || target > range[1])
+      const hit = hidden ? undefined : (pts.find((p) => p[0] === target) ?? pts.findLast((p) => p[0] <= target))
+      const color = s.itemStyle.color as string
+      overlaySeries.push({
+        id: `dot:${s.name}`,
+        name: s.name,
+        type: 'effectScatter',
+        symbol: 'circle',
+        symbolSize: 4,
+        rippleEffect: { brushType: 'stroke', scale: 6, period: 3 },
+        itemStyle: { color },
+        animationDurationUpdate: 0,
+        labelLayout: { moveOverlap: 'shiftY' },
+        tooltip: { show: false },
+        label: {
+          show: true,
+          position: 'left',
+          align: 'right',
+          verticalAlign: 'middle',
+          distance: 8,
+          color: props.isDark ? '#111827' : '#fff',
+          backgroundColor: color,
+          borderRadius: 4,
+          padding: [2, 6],
+          fontSize: 10,
+          fontWeight: 600,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          formatter: (params: any) => {
+            const val = params.value[1];
+            return (val >= 0 ? '+' : '') + val.toFixed(1) + '%';
+          },
+        },
+        zlevel: 1,
+        data: hit ? [{ name: s.name, value: [hit[0], hit[1]] }] : [],
+      })
+    })
+  }
+
+  return { ...option, series: [...option.series, ...overlaySeries] }
 })
 </script>
 
@@ -489,7 +477,7 @@ const option = computed(() => {
       :option="option"
       autoresize
       role="img"
-      aria-label="Seasonal performance chart. Toggle profiles from the legend."
+      :aria-label="ariaLabel"
       class="h-full w-full"
     />
     <div

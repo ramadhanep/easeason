@@ -36,7 +36,7 @@ useHead({
     <main class="mx-auto max-w-3xl px-4 pb-20 pt-10">
       <article v-if="page">
         <p v-if="meta.publishedOn" class="mb-4 font-mono text-xs uppercase tracking-wider text-muted-foreground">
-          {{ new Date(meta.publishedOn).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) }}
+          {{ new Date(meta.publishedOn).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' }) }}
         </p>
         <ContentRenderer :value="page" class="prose-ease" />
       </article>

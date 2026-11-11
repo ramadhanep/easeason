@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowLeft, Moon, Sun } from '@lucide/vue'
+import { ArrowLeft, Moon, Sun, House, Compass, GitCompareArrows, BookOpen } from '@lucide/vue'
 
 defineProps<{
   to?: string
@@ -12,6 +12,16 @@ const colorMode = useColorMode()
 const isDark = computed(() => colorMode.value === 'dark')
 const mounted = ref(false)
 onMounted(() => { mounted.value = true })
+
+const TABS = [
+  { to: '/', label: 'Home', icon: House },
+  { to: '/explore', label: 'Explore', icon: Compass },
+  { to: '/compare', label: 'Compare', icon: GitCompareArrows },
+  { to: '/research', label: 'Research', icon: BookOpen },
+]
+
+const route = useRoute()
+const isActive = (to: string) => (to === '/' ? route.path === '/' : route.path.startsWith(to))
 
 const iconBtn = 'inline-flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground'
 </script>
@@ -60,4 +70,18 @@ const iconBtn = 'inline-flex size-9 shrink-0 cursor-pointer items-center justify
     </div>
     <div v-if="brand" class="absolute inset-x-0 bottom-0 h-px" :style="{ background: `linear-gradient(90deg, transparent, ${brand}, transparent)` }" />
   </header>
+  <!-- Mobile tab bar. Outside <header>: its backdrop-filter would make `fixed` relative to the header. -->
+  <nav class="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-border/70 bg-background/85 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl sm:hidden" aria-label="Main">
+    <NuxtLink
+      v-for="t in TABS"
+      :key="t.to"
+      :to="t.to"
+      class="flex h-14 flex-col items-center justify-center gap-0.5 text-[11px] font-medium"
+      :class="isActive(t.to) ? 'text-foreground' : 'text-muted-foreground'"
+      :aria-current="isActive(t.to) ? 'page' : undefined"
+    >
+      <component :is="t.icon" class="size-5" aria-hidden="true" />
+      {{ t.label }}
+    </NuxtLink>
+  </nav>
 </template>

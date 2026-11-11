@@ -33,7 +33,11 @@ function onKey(e: KeyboardEvent) {
     open.value = !open.value
   }
 }
-onMounted(() => window.addEventListener('keydown', onKey))
+const shortcut = ref('⌘K')
+onMounted(() => {
+  if (!/Mac|iPhone|iPad/.test(navigator.platform)) shortcut.value = 'Ctrl K'
+  window.addEventListener('keydown', onKey)
+})
 onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 </script>
 
@@ -48,11 +52,13 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
         class="inline-flex cursor-pointer items-center gap-3 border border-border bg-muted/50 text-muted-foreground transition-colors hover:border-foreground/20 hover:bg-muted"
         :class="props.variant === 'hero'
           ? 'h-14 w-full rounded-2xl bg-card px-5 text-base shadow-sm'
-          : 'size-9 justify-center rounded-lg sm:w-56 sm:justify-start sm:px-3 text-sm'"
+          : props.pick
+            ? 'h-9 w-full rounded-lg px-3 text-sm'
+            : 'size-9 justify-center rounded-lg sm:w-56 sm:justify-start sm:px-3 text-sm'"
       >
         <Search class="shrink-0" :class="props.variant === 'hero' ? 'size-5' : 'size-4'" />
-        <span class="min-w-0 truncate" :class="props.variant === 'hero' ? '' : 'hidden sm:inline'">{{ placeholder ?? 'Search stocks, crypto, indices…' }}</span>
-        <kbd class="ml-auto hidden shrink-0 rounded border border-border bg-background px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground sm:inline-flex">⌘K</kbd>
+        <span class="min-w-0 truncate" :class="props.variant === 'hero' || props.pick ? '' : 'hidden sm:inline'">{{ placeholder ?? 'Search stocks, crypto, indices…' }}</span>
+        <kbd class="ml-auto hidden shrink-0 rounded border border-border bg-background px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground sm:inline-flex">{{ shortcut }}</kbd>
       </button>
     </PopoverTrigger>
     <PopoverContent

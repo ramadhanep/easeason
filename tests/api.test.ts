@@ -62,3 +62,13 @@ describe('api pipeline', () => {
     expect(ids).toContain('trump-years')
   })
 })
+
+describe('forward window', () => {
+  it('labels dates with the current (non-leap) year calendar', async () => {
+    const rows = await fetchHistoricalData('AAPL')
+    const res = computeSeasonal('AAPL', rows, new Date(Date.UTC(2025, 10, 11)))
+    expect(res.forward?.fromLabel).toBe('Nov 11')
+    expect(res.forward?.toLabel).toBe('Dec 11')
+    expect(res.forward?.years).toBe(25)
+  })
+})

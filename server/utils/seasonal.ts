@@ -10,11 +10,12 @@ import {
   buildCurrentYearProfile,
   buildLatestSeasons,
   buildMonthlyReturns,
+  buildForwardWindow,
   type MonthlyRow,
   type LatestSeason,
   type PriceRow,
-  type Point,
 } from './math'
+import type { SeasonalData, SeasonalProfile } from '#shared/seasonal'
 
 const yf = new YahooFinance({ suppressNotices: ['ripHistorical'] })
 
@@ -26,7 +27,7 @@ const MIN_DAYS = 200
 export { getElectionCycleLabel }
 
 function toPriceRow(r: Row): PriceRow {
-  const year = r.date.getFullYear()
+  const year = r.date.getUTCFullYear()
   const start = Date.UTC(year, 0, 0)
   const doy = Math.floor((r.date.getTime() - start) / 86400000)
   return { year, doy, price: r.adjclose }
@@ -58,39 +59,22 @@ export async function fetchHistoricalData(symbol: string): Promise<Row[]> {
 function stripIncompleteYears(rows: Row[]): Row[] {
   const byYear = new Map<number, number>()
   for (const r of rows) {
-    const y = r.date.getFullYear()
+    const y = r.date.getUTCFullYear()
     byYear.set(y, (byYear.get(y) ?? 0) + 1)
   }
-  return rows.filter((r) => (byYear.get(r.date.getFullYear()) ?? 0) >= MIN_DAYS)
+  return rows.filter((r) => (byYear.get(r.date.getUTCFullYear()) ?? 0) >= MIN_DAYS)
 }
 
-export interface SeasonalProfile {
-  id: string
-  label: string
-  years: number[]
-  points: Point[]
-}
-
-export interface SeasonalResponse {
-  meta: {
-    symbol: string
-    name: string
-    currentPrice?: number
-    firstYear?: number
-    lastYear?: number
-    currentYear: number
-  }
-  profiles: SeasonalProfile[]
-  currentYear?: { year: number; points: Point[] }
+export type SeasonalResponse = SeasonalData & {
   latestSeasons: LatestSeason[]
   fullSeasonStart: number
   monthly: MonthlyRow[]
 }
 
 export function computeSeasonal(symbol: string, rows: Row[], now = new Date()): SeasonalResponse {
-  const currentYear = now.getFullYear()
-  const hist = stripIncompleteYears(rows.filter((r) => r.date.getFullYear() < currentYear))
-  const current = rows.filter((r) => r.date.getFullYear() === currentYear)
+  const currentYear = now.getUTCFullYear()
+  const hist = stripIncompleteYears(rows.filter((r) => r.date.getUTCFullYear() < currentYear))
+  const current = rows.filter((r) => r.date.getUTCFullYear() === currentYear)
 
   const histReturns = calculateDailyReturns(hist.map(toPriceRow))
   const cvReturns = calculateDailyReturns(current.map(toPriceRow))
@@ -162,8 +146,17 @@ export function computeSeasonal(symbol: string, rows: Row[], now = new Date()): 
     currentYear: currentPoints.length ? { year: currentYear, points: currentPoints } : undefined,
     fullSeasonStart: fullSeasonStartPhase(currentYear),
     monthly: buildMonthlyReturns([...histReturns, ...cvReturns]),
+    forward: forwardWithLabels(histReturns, now),
     latestSeasons: buildLatestSeasons(calculateDailyReturns(rows.map(toPriceRow)), currentYear),
   }
+}
+
+// Labels use the current year's calendar (monthLabel assumes a leap year, off by one from March).
+function forwardWithLabels(returns: Parameters<typeof buildForwardWindow>[0], now: Date) {
+  const w = buildForwardWindow(returns, toPriceRow({ date: now, adjclose: 0 }).doy)
+  if (!w) return undefined
+  const label = (doy: number) => new Date(Date.UTC(now.getUTCFullYear(), 0, doy)).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })
+  return { ...w, fromLabel: label(w.fromDay), toLabel: label(w.toDay) }
 }
 
 const CACHE_TTL_MS = 30 * 60 * 1000

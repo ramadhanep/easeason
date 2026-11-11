@@ -1,6 +1,11 @@
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
+  // Browser/CDN caching. Server already keeps a 30-min in-memory cache (server/utils/seasonal.ts).
+  routeRules: {
+    '/api/seasonal': { headers: { 'cache-control': 'public, max-age=300, s-maxage=1800, stale-while-revalidate=86400' } },
+    '/api/symbols': { headers: { 'cache-control': 'public, max-age=3600' } },
+  },
   modules: ['shadcn-nuxt', '@nuxtjs/tailwindcss', '@nuxtjs/color-mode', '@nuxt/content', '@vite-pwa/nuxt', '@nuxt/eslint'],
   colorMode: {
     classSuffix: '',
